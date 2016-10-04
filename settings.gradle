@@ -1,0 +1,4 @@
+rootProject.name = 'kaoskit'
+include 'kaos-core'
+include 'kaos-appender-log4j'
+
