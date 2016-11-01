@@ -1,6 +1,7 @@
 package com.polydeucesys.kaos.core.behaviours;
 
 import com.polydeucesys.kaos.core.BaseBehaviour;
+import com.polydeucesys.kaos.core.RandomGenerator;
 
 import java.util.Random;
 
@@ -26,15 +27,37 @@ import java.util.Random;
  * Created by kevinmclellan on 14/09/2016.
  */
 public class RandomSleeper extends BaseBehaviour {
-    private final long maxSleep = 100L;
-    // we're not doing cryptography. No need for SecureRandom or other such thing.
-    private final Random r = new Random(System.currentTimeMillis());
+    private final long maxSleep;
+
+    public RandomSleeper(){
+        this.maxSleep = 100L;
+    }
+
+    public RandomSleeper( long maxSleep ){
+        this.maxSleep = maxSleep;
+    }
+
+    long maxSleep(){
+        return maxSleep;
+    }
+
+    private volatile long sleepTime = -1L;
+
+    // exposed for testing
+    long lastSleep(){
+        return sleepTime;
+    }
 
     public boolean doExecute() {
         boolean done = false;
+        long start = System.currentTimeMillis();
+        sleepTime = RandomGenerator.nextLong(maxSleep);
         while(!done) {
             try {
-                Thread.sleep((long) (r.nextDouble() * maxSleep));
+                long delta_t = System.currentTimeMillis() - start;
+                if(delta_t < sleepTime){
+                    Thread.sleep(sleepTime - delta_t);
+                }
                 done = true;
             } catch (InterruptedException e) {
             }

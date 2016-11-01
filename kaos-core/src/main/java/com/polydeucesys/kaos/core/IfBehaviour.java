@@ -18,27 +18,27 @@ package com.polydeucesys.kaos.core;
 
 /**
  * Conditional behaviour which, if the {@code condition} evaluates to {@code true} will execute the
- * {@code t} Behaviour, otherwise it will evaluate the {@code f} Behaviour.
+ * {@code conditionTrue} Behaviour, otherwise it will evaluate the {@code conditionFalse} Behaviour.
  *
  * Created by kevinmclellan on 29/09/2016.
  */
 public class IfBehaviour<T> extends KaosBase implements Behaviour<T> {
     private static final String CONDITION_MESSAGE = "If condiditon returned %s, executing %s";
     private final BaseBehaviour condition;
-    private final BaseBehaviour t;
-    private final BaseBehaviour f;
+    private final BaseBehaviour conditionTrue;
+    private final BaseBehaviour conditionFalse;
 
     IfBehaviour(BaseBehaviour condition, BaseBehaviour t, BaseBehaviour f){
         this.condition = condition;
-        this.t = t;
-        this.f = f;
+        this.conditionTrue = t;
+        this.conditionFalse = f;
     }
 
     @Override
     public boolean execute() throws Exception{
         boolean flag = condition.execute();
-        boolean retVal = flag?t.execute():f.execute();
-        getMonitor().message(String.format(CONDITION_MESSAGE, flag, flag?t.name():f.name()));
+        boolean retVal = flag? conditionTrue.execute(): conditionFalse.execute();
+        getMonitor().message(String.format(CONDITION_MESSAGE, flag, flag? conditionTrue.name(): conditionFalse.name()));
         return retVal;
     }
 
@@ -46,22 +46,22 @@ public class IfBehaviour<T> extends KaosBase implements Behaviour<T> {
     @Override
     public boolean execute(T returnValue) throws Exception {
         boolean flag = condition.execute(returnValue);
-        boolean retVal = flag?t.execute(returnValue):f.execute(returnValue);
-        getMonitor().message(String.format(CONDITION_MESSAGE, flag, flag?t.name():f.name()));
+        boolean retVal = flag? conditionTrue.execute(returnValue): conditionFalse.execute(returnValue);
+        getMonitor().message(String.format(CONDITION_MESSAGE, flag, flag? conditionTrue.name(): conditionFalse.name()));
         return retVal;
     }
 
     @Override
     public void doStart() {
         condition.doStart();
-        t.doStart();
-        f.doStart();
+        conditionTrue.doStart();
+        conditionFalse.doStart();
     }
 
     @Override
     public void doStop() {
         condition.doStop();
-        t.doStop();
-        f.doStop();
+        conditionTrue.doStop();
+        conditionFalse.doStop();
     }
 }

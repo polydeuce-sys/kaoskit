@@ -17,7 +17,9 @@ package com.polydeucesys.kaos.core.behaviours;
  */
 
 import com.polydeucesys.kaos.core.BaseBehaviour;
+import com.polydeucesys.kaos.core.RandomGenerator;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -28,22 +30,26 @@ import java.util.Random;
  * Created by kevinmclellan on 29/09/2016.
  */
 public class ExceptionThrower extends BaseBehaviour {
-
+    private static final String EXECUTE_MESSAGE = "Throwing %s";
     private final List<Exception> exceptions;
-    private float chooser;
-    private final Random r = new Random(System.currentTimeMillis());
+    private final int top;
 
-    ExceptionThrower(List<Exception> exceptions, float chooser){
-        this.exceptions = exceptions;
-        this.chooser = chooser;
+    public ExceptionThrower(List<Exception> exceptions){
+        this.exceptions = Collections.unmodifiableList(exceptions);
+        // max index
+        this.top = exceptions.size() - 1;
     }
 
+    List<Exception> exceptions(){
+        return exceptions;
+    }
 
     @Override
     public boolean doExecute() throws Exception{
-        float roll = r.nextFloat();
-        int index = Math.round(roll / chooser);
-        throw exceptions.get(index);
+        int index = RandomGenerator.nextInt(top);
+        Exception e = exceptions.get(index);
+        getMonitor().message(String.format(EXECUTE_MESSAGE, e.getClass()));
+        throw e;
     }
 
     @Override

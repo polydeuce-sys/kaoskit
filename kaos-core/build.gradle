@@ -2,6 +2,8 @@ group 'com.polydeucesys'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'maven-publish'
+
 
 sourceCompatibility = 1.7
 
@@ -10,7 +12,33 @@ repositories {
     mavenCentral()
 }
 
+task packageTests(type: Jar) {
+    classifier='tests'
+    baseName = "${project.name}-test"
+    from sourceSets.test.output
+}
+
+configurations {
+    tests {
+        extendsFrom testRuntime
+    }
+}
+
 dependencies {
-    compile group: 'com.polydeuce-sys', name: 'simple-java-validators', version: '1.0-SNAPSHOT'
     testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+
+artifacts{
+    tests packageTests
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact packageTests {
+                classifier "tests"
+            }
+        }
+    }
 }

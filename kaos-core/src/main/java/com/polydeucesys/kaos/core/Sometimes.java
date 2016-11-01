@@ -23,25 +23,37 @@ import java.util.Random;
  * randomly.
  * Created by kevinmclellan on 03/10/2016.
  */
-public class Sometimes extends KaosBase{
+public abstract class Sometimes extends KaosBase{
     private float odds;
-    private final Random r = new Random();
 
     public Sometimes( float odds ){
         this.odds = odds;
     }
 
     public float roll(){
-        return r.nextFloat();
+        return RandomGenerator.nextFloat();
     }
 
     public boolean isPerform(){
-        return (roll() <= odds);
+        boolean willPerform = (roll() <= odds);
+        return willPerform;
+    }
+
+    protected abstract Monitorable sometimes();
+
+    @Override
+    public void setMonitor(Monitor monitor) {
+        super.setMonitor(monitor);
+        if(sometimes() instanceof KaosBase)
+            ((KaosBase) sometimes()).setMonitor(monitor);
+    }
+    // visbile for testing
+    float odds(){
+        return odds;
     }
 
     @Override
     public void doStart() {
-        r.setSeed(System.currentTimeMillis());
     }
 
     @Override

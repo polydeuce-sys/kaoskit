@@ -28,6 +28,8 @@ import java.util.Map;
  */
 public class KaosStrategy<T> implements Strategy<T> {
 
+
+
     static class DefaultStrategyMonitor implements Monitor{
 
         @Override
@@ -43,11 +45,13 @@ public class KaosStrategy<T> implements Strategy<T> {
 
     public static class KaosStrategyBuilder implements StrategyBuilder{
         private static final String NEW_STRATEGY = "Created new Strategy instance";
+        private static final String NO_NAME = "Strategy requires name";
         private static final String MONITOR_AFTER_ADDING = "Monitor must be set before any behaviours are added";
         private static final String ADD_AFTER_COMPLETE = "Builder already completed";
         private static final String ADDED = "Added instance of %s as %s";
 
         private volatile boolean built = false;
+        private String name;
         private Monitor monitor = new DefaultStrategyMonitor();
         private final List<Behaviour> beforeBehaviours = new ArrayList<>();
         private final List<Behaviour> afterBehaviours = new ArrayList<>();
@@ -62,9 +66,15 @@ public class KaosStrategy<T> implements Strategy<T> {
         }
 
         @Override
+        public StrategyBuilder setName(String name) {
+            if(built) throw new IllegalStateException(ADD_AFTER_COMPLETE);
+            this.name = name;
+            return this;
+        }
+
+        @Override
         public synchronized StrategyBuilder addBeforeBehaviour( Behaviour b) {
             if(built) throw new IllegalStateException(ADD_AFTER_COMPLETE);
-            b.setMonitor(monitor);
             beforeBehaviours.add(b);
             monitor.message(String.format(ADDED, b.name(), "before Behaviour"));
             return this;
@@ -73,7 +83,6 @@ public class KaosStrategy<T> implements Strategy<T> {
         @Override
         public StrategyBuilder addAfterBehaviour(Behaviour b) {
             if(built) throw new IllegalStateException(ADD_AFTER_COMPLETE);
-            b.setMonitor(monitor);
             afterBehaviours.add(b);
             monitor.message(String.format(ADDED, b.name(), "after Behaviour"));
             return this;
@@ -82,7 +91,6 @@ public class KaosStrategy<T> implements Strategy<T> {
         @Override
         public StrategyBuilder addModifier(Modifier m) {
             if(built) throw new IllegalStateException(ADD_AFTER_COMPLETE);
-            m.setMonitor(monitor);
             monitor.message(String.format(ADDED, m.name(), "Modifier"));
             modifiers.add(m);
             return this;
@@ -90,14 +98,15 @@ public class KaosStrategy<T> implements Strategy<T> {
 
         @Override
         public Strategy build() {
-            Strategy newStrategy = new KaosStrategy(monitor, beforeBehaviours, afterBehaviours, modifiers);
+            if(name == null || monitor == null) throw new ConfigurationException("Missing Monitor");
+            Strategy newStrategy = new KaosStrategy(name,monitor, beforeBehaviours, afterBehaviours, modifiers);
             built = true;
             monitor.message(NEW_STRATEGY);
             return newStrategy;
         }
 
     }
-
+    private final String name;
     private final Monitor monitor;
     private final List<Behaviour> beforeBehaviours;
     private final List<Behaviour> afterBehaviours;
@@ -105,62 +114,70 @@ public class KaosStrategy<T> implements Strategy<T> {
 
 
     private volatile boolean started = false;
+    private final Object strategyLock = new Object();
 
-    private KaosStrategy( Monitor monitor,
+    private KaosStrategy( String name,
+                          Monitor monitor,
                           List<Behaviour> beforeBehaviours,
                           List<Behaviour> afterBehaviours,
                           List<Modifier> modifiers){
+        this.name = name;
         this.monitor = monitor;
         this.beforeBehaviours = Collections.unmodifiableList(beforeBehaviours);
         this.afterBehaviours = Collections.unmodifiableList(afterBehaviours);
         this.modifiers = Collections.unmodifiableList(modifiers);
     }
 
+    @Override
+    public String name() {
+        return name;
+    }
+
     /**
      * Allow behaviours to aquire any required resources, start timers or other actions.
      */
     public void start() {
-        for( Behaviour b : beforeBehaviours) b.start();
-        for( Behaviour b : afterBehaviours) b.start();
-        started = true;
+        synchronized(strategyLock) {
+            for (Behaviour b : beforeBehaviours) b.start();
+            for (Behaviour b : afterBehaviours) b.start();
+            for (Modifier m : modifiers) m.start();
+            started = true;
+        }
     }
 
-    private void stopList( List<Behaviour> stopList){
-        final List<Behaviour> stopping = new ArrayList<>(stopList.size());
-        Collections.copy(stopping ,stopList);
+    private void stopList( List stopList){
+        final List<Lifecycle> stopping = new ArrayList<>(stopList.size());
+        Collections.copy(stopping, stopList);
         Collections.reverse(stopping);
-        for( Behaviour b : stopping){
-            b.stop();
+        for (Lifecycle l : stopping) {
+            l.stop();
         }
-
     }
 
     /**
      * Signal behaviours to release resources, stop times or other actions to end thier behaviour.
      */
     public void stop() {
-        stopList(beforeBehaviours);
-        stopList(afterBehaviours);
-        started = false;
+        synchronized(strategyLock) {
+            stopList(beforeBehaviours);
+            stopList(afterBehaviours);
+            stopList(modifiers);
+            started = false;
+        }
     }
 
     public boolean isStarted() {
         return started;
     }
 
-    private List<Behaviour> copyBehaviours(List<Behaviour> behaviours){
-        final List<Behaviour> behaviourCopy = new ArrayList<>(behaviours.size());
-        Collections.copy(behaviourCopy ,behaviours);
-        return Collections.unmodifiableList(behaviourCopy);
-    }
-
+    @Override
     public List<Behaviour> beforeBehaviours() {
-        return copyBehaviours(beforeBehaviours);
+        return beforeBehaviours;
     }
 
     @Override
     public List<Behaviour> afterBehaviours() {
-        return copyBehaviours(afterBehaviours);
+        return afterBehaviours;
     }
 
     @Override

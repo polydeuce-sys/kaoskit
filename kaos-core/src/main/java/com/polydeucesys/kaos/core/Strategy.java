@@ -26,7 +26,7 @@ import java.util.List;
  * read from another system to simulate a change to a remote API (REST response for example)
  * Created by kevinmclellan on 13/09/2016.
  */
-public interface Strategy<T> extends Lifecycle
+public interface Strategy<T> extends Lifecycle, Monitorable
 {
     List<Behaviour> beforeBehaviours();
     List<Behaviour> afterBehaviours();

@@ -34,6 +34,11 @@ public class SometimesBehaviour extends Sometimes implements Behaviour {
         this.sometimes = sometimesBehaviour;
     }
 
+    protected Monitorable sometimes(){
+        return sometimes;
+    }
+
+
     @Override
     public boolean execute() throws Exception {
         boolean result =  isPerform() && sometimes.execute();

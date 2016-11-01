@@ -21,10 +21,10 @@ package com.polydeucesys.kaos.core;
  * first item defined, as it must receive messages for all other changes added.
  * Created by kevinmclellan on 27/09/2016.
  */
-public interface StrategyBuilder {
+public interface StrategyBuilder extends Builder<Strategy>{
+    StrategyBuilder setName(String name);
     StrategyBuilder addBeforeBehaviour( Behaviour b);
     StrategyBuilder addAfterBehaviour( Behaviour b);
     StrategyBuilder addModifier( Modifier m);
     StrategyBuilder setMonitor( Monitor monitor);
-    Strategy build();
 }

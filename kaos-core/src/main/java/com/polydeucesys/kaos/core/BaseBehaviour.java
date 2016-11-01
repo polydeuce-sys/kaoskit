@@ -1,7 +1,5 @@
 package com.polydeucesys.kaos.core;
 
-import com.polydeucesys.validation.ValidatableObject;
-import com.polydeucesys.validation.ValidationException;
 
 /*
  *  Copyright 2016 Polydeuce-Sys Ltd

@@ -22,5 +22,4 @@ package com.polydeucesys.kaos.core;
  */
 public interface Monitorable extends Lifecycle{
     String name();
-    void setMonitor( Monitor monitor );
 }

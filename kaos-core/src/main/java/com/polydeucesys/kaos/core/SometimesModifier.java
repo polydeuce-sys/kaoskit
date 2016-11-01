@@ -31,6 +31,10 @@ public class SometimesModifier<T> extends Sometimes implements Modifier<T> {
         this.sometimes = sometimes;
     }
 
+    protected Monitorable sometimes(){
+        return sometimes;
+    }
+
     @Override
     public T modify(T original) {
         boolean modify = isPerform();

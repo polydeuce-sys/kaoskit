@@ -2,12 +2,9 @@ package com.polydeucesys.kaos;
 
 
 import com.polydeucesys.kaos.core.ExceptionHandler;
-import com.polydeucesys.kaos.core.Strategy;
+import com.polydeucesys.kaos.core.GenericKaosRunner;
 import org.apache.log4j.AppenderSkeleton;
-import org.apache.log4j.spi.ErrorCode;
 import org.apache.log4j.spi.LoggingEvent;
-
-import java.util.concurrent.Callable;
 /*
  * Copyright (c) 2016 Polydeuce-Sys Ltd
  * <p>
@@ -35,31 +32,33 @@ import java.util.concurrent.Callable;
  */
 public class KaosAppender extends AppenderSkeleton{
 
-    private Strategy kaosStrategy;
+    private String strategyName;
+    private GenericKaosRunner kaosRunner = new GenericKaosRunner();
+
+    public void setStrategyName( String strategyName ){
+        kaosRunner.setStrategyName(strategyName);
+    }
+
     private ExceptionHandler handler = new ExceptionHandler() {
         @Override
         public void handle(Exception e) {
-            // NOOP by default
+            if(e instanceof RuntimeException) throw ((RuntimeException) e);
         }
     };
 
-    private final Object strategyLock = new Object();
-
     @SuppressWarnings("unchecked")
     protected void append(LoggingEvent loggingEvent) {
+        // avoiding recursion rather than thread safety
         try {
-            kaosStrategy.executeBefore();
-            kaosStrategy.executeAfter(null);
+            kaosRunner.causeKaos();
         } catch (Exception e) {
-            // NOOP
+            kaosRunner.errorHandler().error(e.getMessage(), e);
         }
     }
 
     @Override
     public void close() {
-        synchronized(strategyLock) {
-            kaosStrategy.stop();
-        }
+        kaosRunner.stop();
     }
 
     public boolean requiresLayout() {
@@ -68,8 +67,6 @@ public class KaosAppender extends AppenderSkeleton{
 
     @Override
     public void activateOptions(){
-        synchronized(strategyLock){
-            kaosStrategy.start();
-        }
+        kaosRunner.start();
     }
 }

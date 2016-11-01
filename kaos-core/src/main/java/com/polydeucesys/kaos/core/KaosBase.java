@@ -16,13 +16,11 @@ package com.polydeucesys.kaos.core;
  * limitations under the License.
  */
 
-import com.polydeucesys.validation.ValidatableObject;
-import com.polydeucesys.validation.ValidationException;
-
 /**
+ * Base class used for Behaviour and Modifier implementations in this framework.
  * Created by kevinmclellan on 03/10/2016.
  */
-public abstract class KaosBase extends ValidatableObject implements Monitorable {
+public abstract class KaosBase implements Monitorable {
     private static final String INVALID_CONFIG = "Invalid configuration of instance %s";
     private static final String STARTED = "Started %s";
     private static final String STOPPED = "Stopped %s";
@@ -36,11 +34,6 @@ public abstract class KaosBase extends ValidatableObject implements Monitorable 
     public abstract void doStop();
 
     public final void start(){
-        try {
-            validate();
-        } catch (ValidationException e) {
-            throw new IllegalStateException(String.format(INVALID_CONFIG,name()), e);
-        }
         doStart();
         monitor.message(String.format(STARTED,name()));
         started = true;
@@ -56,7 +49,7 @@ public abstract class KaosBase extends ValidatableObject implements Monitorable 
         started = false;
     }
 
-    @Override
+
     public void setMonitor(Monitor monitor) {
         this.monitor = monitor;
     }
