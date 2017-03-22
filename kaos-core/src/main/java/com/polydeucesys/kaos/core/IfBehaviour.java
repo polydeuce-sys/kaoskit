@@ -16,22 +16,50 @@ package com.polydeucesys.kaos.core;
  * limitations under the License.
  */
 
+import com.polydeucesys.kaos.core.behaviours.conditions.BaseCondition;
+
 /**
  * Conditional behaviour which, if the {@code condition} evaluates to {@code true} will execute the
  * {@code conditionTrue} Behaviour, otherwise it will evaluate the {@code conditionFalse} Behaviour.
  *
  * Created by kevinmclellan on 29/09/2016.
  */
-public class IfBehaviour<T> extends KaosBase implements Behaviour<T> {
+public class IfBehaviour<T> extends BaseBehaviour<T> {
     private static final String CONDITION_MESSAGE = "If condiditon returned %s, executing %s";
-    private final BaseBehaviour condition;
-    private final BaseBehaviour conditionTrue;
-    private final BaseBehaviour conditionFalse;
+    private final BaseCondition<T> condition;
+    private final BaseBehaviour<T> conditionTrue;
+    private final BaseBehaviour<T> conditionFalse;
 
-    IfBehaviour(BaseBehaviour condition, BaseBehaviour t, BaseBehaviour f){
+    public IfBehaviour(BaseCondition<T> condition, BaseBehaviour t, BaseBehaviour f){
         this.condition = condition;
         this.conditionTrue = t;
         this.conditionFalse = f;
+    }
+
+    // visible for testing
+    BaseCondition<T> condition(){
+        return condition;
+    }
+
+    BaseBehaviour conditionTrue(){
+        return conditionTrue;
+    }
+
+    BaseBehaviour conditionFalse(){
+        return conditionFalse;
+    }
+
+    @Override
+    public void setMonitor(Monitor monitor){
+        super.setMonitor(monitor);
+        condition.setMonitor(monitor);
+        conditionTrue.setMonitor(monitor);
+        conditionFalse.setMonitor(monitor);
+    }
+
+    @Override
+    public boolean doExecute() throws Exception {
+        throw new Exception("doExecute called on IfBehaviour. This should not be possible");
     }
 
     @Override

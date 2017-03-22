@@ -19,6 +19,7 @@ package com.polydeucesys.kaos.core;
 import com.polydeucesys.kaos.core.behaviours.ExceptionThrower;
 import com.polydeucesys.kaos.core.behaviours.Interrupter;
 import com.polydeucesys.kaos.core.behaviours.RandomSleeper;
+import com.polydeucesys.kaos.core.behaviours.conditions.RegexBehaviour;
 
 import java.util.*;
 
@@ -48,6 +49,7 @@ class DefaultConfigurationImpl implements Configuration {
     private static final String INTERRUPT = "interrupt";
 
     private static final String ODDS = "odds";
+    private static final String MATCHES = "matches";
     private static final String MAX = "max";
     private static final String CAN_THROW = "throws";
     private static final String STATES = "states";
@@ -59,11 +61,11 @@ class DefaultConfigurationImpl implements Configuration {
     private static final String MISSING_PARAM = "Missing Required Config %s from %s";
     private static final String UNKNOWN_BEHAVIOUR = "Unrecognized behviour type in config";
 
-    private static final Map<String, Strategy> defaultMap;
+    private static Map<String, Strategy> defaultMap;
 
 
     static {
-        defaultMap = initConfig();
+        initConfig();
     }
 
     private static Monitor buildMonitor(){
@@ -93,7 +95,7 @@ class DefaultConfigurationImpl implements Configuration {
 
     private static Behaviour buildSleepBehaviour(){
         String sleepParams = System.getProperty(SLEEP_PARAMS_KEY,"");
-        Behaviour sleepBehaviour = new RandomSleeper();
+        BaseBehaviour sleepBehaviour = new RandomSleeper();
         if(!sleepParams.isEmpty()){
             Map<String, String> sleepParamMap = paramsToMap(sleepParams);
             RandomSleeper s = (sleepParamMap.containsKey(MAX)?
@@ -103,13 +105,18 @@ class DefaultConfigurationImpl implements Configuration {
             }else{
                 sleepBehaviour = s;
             }
+            if(sleepParamMap.containsKey(MATCHES)){
+                sleepBehaviour = new IfBehaviour(new RegexBehaviour(sleepParamMap.get(MATCHES)),
+                        sleepBehaviour,
+                        new DoNothing.Behaviour());
+            }
         }
         return sleepBehaviour;
     }
 
     private static Behaviour buildThrowBehaviour(){
         String throwParams = System.getProperty(THROW_PARAMS_KEY,"");
-        Behaviour throwBehaviour = null;
+        BaseBehaviour throwBehaviour = null;
         if(!throwParams.isEmpty()){
             Map<String, String> throwParamMap = paramsToMap(throwParams);
             if(!throwParamMap.containsKey(CAN_THROW))
@@ -133,13 +140,18 @@ class DefaultConfigurationImpl implements Configuration {
             }else {
                 throwBehaviour = et;
             }
+            if(throwParamMap.containsKey(MATCHES)){
+                throwBehaviour = new IfBehaviour(new RegexBehaviour(throwParamMap.get(MATCHES)),
+                        throwBehaviour,
+                        new DoNothing.Behaviour());
+            }
         }
         return throwBehaviour;
     }
 
     private static Behaviour buildInterruptBehaviour(){
         String interruptParams = System.getProperty(INTERRUPT_PARAMS_KEY,"");
-        Behaviour interruptBehaviour = null;
+        BaseBehaviour interruptBehaviour = null;
         if(!interruptParams.isEmpty()){
             Map<String, String> interruptParamMap = paramsToMap(interruptParams);
             String[] states = interruptParamMap.containsKey(STATES)?
@@ -150,6 +162,11 @@ class DefaultConfigurationImpl implements Configuration {
             }
             boolean firstOnly = !interruptParamMap.containsKey(ONLY_FIRST) || Boolean.parseBoolean(interruptParamMap.get(ONLY_FIRST));
             interruptBehaviour = new Interrupter(searchStates, firstOnly);
+            if(interruptParamMap.containsKey(MATCHES)){
+                interruptBehaviour = new IfBehaviour(new RegexBehaviour(interruptParamMap.get(MATCHES)),
+                        interruptBehaviour,
+                        new DoNothing.Behaviour());
+            }
         }
         return interruptBehaviour;
     }
@@ -193,7 +210,7 @@ class DefaultConfigurationImpl implements Configuration {
         }
     }
     // visible for tesing
-    static Map<String, Strategy> initConfig(){
+    static void initConfig(){
         StrategyBuilder b = new KaosStrategy.KaosStrategyBuilder();
         b.setName("default");
         Monitor m = buildMonitor();
@@ -207,7 +224,7 @@ class DefaultConfigurationImpl implements Configuration {
         // befores and afters
         doBehaviourList(beforeBehaviours,b,m, sleepBehaviour, throwBehaviour, interruptBehaviour, true );
         doBehaviourList(afterBehaviours,b,m, sleepBehaviour, throwBehaviour, interruptBehaviour, false );
-        return new UnmodifiableConstantStrategyMap(b.build());
+        defaultMap = new UnmodifiableConstantStrategyMap(b.build());
     }
 
     private static Map<String, String> paramsToMap( String params ){

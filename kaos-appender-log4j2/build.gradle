@@ -2,6 +2,7 @@ group 'com.polydeucesys'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.7
 
@@ -17,3 +18,12 @@ dependencies {
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.7'
     testCompile group: 'com.polydeucesys', name: 'kaos-core', version: '1.0-SNAPSHOT', classifier: 'tests'
     testCompile group: 'junit', name: 'junit', version: '4.11'}
+
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}

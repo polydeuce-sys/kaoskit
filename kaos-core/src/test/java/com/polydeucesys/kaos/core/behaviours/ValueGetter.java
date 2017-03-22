@@ -26,6 +26,7 @@ import java.util.Set;
  * Created by kevinmclellan on 26/10/2016.
  */
 public class ValueGetter {
+
     public static long getMaxSleep(RandomSleeper rs){
         return rs.maxSleep();
     }
@@ -44,5 +45,6 @@ public class ValueGetter {
         return i.isFirstMatchOnly();
     }
 
+    private ValueGetter(){}
 
 }

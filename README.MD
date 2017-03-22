@@ -32,4 +32,10 @@ this must throw a RuntimeException (as the append method does not declare checke
 will be rethrown by the appender or appropriate error handling class depending on log framework.
 
 ### Aspect Oriented
-For a more
+In order to make use of facilities like Modifier instances and have more fine grained control over exception
+throwing Aspect Oritented tools or similar bytecode level integrations can be used.
+
+
+### TODO:
+Update appenders to allow use of modifiers as a means not of modifying a log message, but of triggering
+behaviour based on the message (regex on message). Add option to use this.

@@ -61,7 +61,7 @@ public class KaosAppender extends AppenderBase<ILoggingEvent> {
     @Override
     protected void append(ILoggingEvent eventObject) {
         try {
-            kaosRunner.causeKaos();
+            kaosRunner.<String>causeKaos( eventObject.getFormattedMessage());
         } catch (Exception e) {
             kaosRunner.errorHandler().error(e.getMessage(), e);
             addError(e.getMessage(), e);

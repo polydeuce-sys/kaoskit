@@ -65,12 +65,4 @@ public class RandomSleeper extends BaseBehaviour {
         return true;
     }
 
-    public void doStart() {
-        // no need for setup
-    }
-
-    public void doStop() {
-        // no need for shutdown
-    }
-
 }

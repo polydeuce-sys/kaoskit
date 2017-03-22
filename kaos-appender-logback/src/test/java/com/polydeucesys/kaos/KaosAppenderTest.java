@@ -18,6 +18,8 @@ package com.polydeucesys.kaos;
 
 import ch.qos.logback.classic.LoggerContext;
 import com.polydeucesys.kaos.core.StringListMonitor;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,24 +29,30 @@ import java.nio.file.FileSystemNotFoundException;
 
 import static com.polydeucesys.kaos.core.ConfigurationFactory.*;
 import static com.polydeucesys.kaos.core.ConfigurationFactory.MONITOR_CLASS_KEY;
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertTrue;
 
 /**
  * Created by kevinmclellan on 01/11/2016.
  */
 public class KaosAppenderTest {
+    @Before
+    public void setConfigFactory(){
+        System.setProperty(CONFIGURATION_CLASS_KEY, "com.polydeucesys.kaos.UnitTestConfigurationImpl");
+    }
+
+    @After
+    public void cleanProps(){
+        System.clearProperty(CONFIGURATION_CLASS_KEY);
+    }
+
     @Test
     public void testAppenderExecutesBehaviours(){
-        System.setProperty(BEFORE_BEHAVIOURS_KEY, "sleep");
-        System.setProperty(AFTER_BEHAVIOURS_KEY, "throw");
-        System.setProperty(SLEEP_PARAMS_KEY, "max=50");
-        System.setProperty(THROW_PARAMS_KEY, "odds=1.0;throws=javax.xml.ws.WebServiceException,java.nio.file.FileSystemNotFoundException");
-        System.setProperty(MONITOR_CLASS_KEY,StringListMonitor.class.getCanonicalName());
-
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         context.start();
 
-        Logger testLogger = LoggerFactory.getLogger("UnitTest");        boolean didThrow = false;
+        Logger testLogger = LoggerFactory.getLogger("UnitTest");
+        boolean didThrow = false;
 
         try {
             testLogger.info("Well this is a fine how do you do");
@@ -65,6 +73,40 @@ public class KaosAppenderTest {
             }
         }
         assertTrue(seenExecuted);
+        assertTrue(didThrow);
+    }
+
+    @Test
+    public void testAppenderRegexExecutesBehaviours(){
+
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+        context.start();
+
+        Logger testLogger = LoggerFactory.getLogger("UnitTest2");
+        boolean didThrow = false;
+
+        try {
+            testLogger.info("This is just a line");
+        }catch(Exception e){
+            fail();
+        }
+        try {
+            testLogger.info("So is this I think");
+        }catch(Exception e){
+            fail();
+        }
+        try {
+            testLogger.info("DoThrow on this line");
+            fail();
+        }catch(Exception e){
+            if(e instanceof WebServiceException || e instanceof FileSystemNotFoundException){
+
+            }else{
+                throw e;
+            }
+            didThrow = true;
+        }
+
         assertTrue(didThrow);
     }
 }

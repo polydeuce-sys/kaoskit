@@ -9,11 +9,19 @@
     </appender>
 
     <appender name="Kaos" class="com.polydeucesys.kaos.KaosAppender">
-        <strategyName>default</strategyName>
+        <strategyName>test1</strategyName>
+    </appender>
+
+    <appender name="Kaos2" class="com.polydeucesys.kaos.KaosAppender">
+        <strategyName>test2</strategyName>
     </appender>
 
     <logger name="UnitTest" level="info">
         <appender-ref ref="Kaos"></appender-ref>
+    </logger>
+
+    <logger name="UnitTest2" level="info">
+        <appender-ref ref="Kaos2"></appender-ref>
     </logger>
 
     <root level="debug">

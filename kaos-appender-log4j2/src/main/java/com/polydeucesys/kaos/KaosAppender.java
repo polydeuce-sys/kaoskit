@@ -86,7 +86,7 @@ public class KaosAppender extends AbstractAppender {
     @Override
     public void append(LogEvent log) {
         try {
-            kaosRunner.causeKaos();
+            kaosRunner.causeKaos(log.getMessage().getFormattedMessage());
         } catch (Exception e) {
             error(e.getMessage(),e);
         }

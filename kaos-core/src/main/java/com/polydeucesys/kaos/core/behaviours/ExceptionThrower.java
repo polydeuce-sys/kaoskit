@@ -52,13 +52,4 @@ public class ExceptionThrower extends BaseBehaviour {
         throw e;
     }
 
-    @Override
-    public void doStart() {
-// NOOP
-    }
-
-    @Override
-    public void doStop() {
-// NOOP
-    }
 }

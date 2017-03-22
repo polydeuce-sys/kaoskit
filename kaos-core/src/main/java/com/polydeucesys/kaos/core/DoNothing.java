@@ -20,31 +20,21 @@ package com.polydeucesys.kaos.core;
  * Default behaviour which performs no action.
  * Created by kevinmclellan on 29/09/2016.
  */
-public class DoNothing extends KaosBase implements Behaviour, Modifier{
-    @Override
-    public boolean execute() throws Exception {
-        return false;
+public class DoNothing{
+    public static class Behaviour<T> extends BaseBehaviour<T>{
+
+        @Override
+        public boolean doExecute() throws Exception {
+            return true;
+        }
     }
 
-    @Override
-    public boolean execute(Object returnValue) throws Exception {
-        return execute();
-    }
+    public static class Modifier<T> extends BaseModifier<T>{
 
-    @Override
-    public Object modify(Object original) {
-        return original;
-    }
-
-
-    @Override
-    public void doStart() {
-    // NOOP
-    }
-
-    @Override
-    public void doStop() {
-    // NOOP
+        @Override
+        protected T doModify(T original) {
+            return original;
+        }
     }
 
 }

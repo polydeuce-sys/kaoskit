@@ -47,16 +47,6 @@ public class Interrupter extends BaseBehaviour {
     }
 
     @Override
-    public void doStart() {
-        // No setup required
-    }
-
-    @Override
-    public void doStop() {
-        // No setup required
-    }
-
-    @Override
     public boolean doExecute() throws Exception {
         ThreadGroup tg = Thread.currentThread().getThreadGroup();
         Thread[] available = new Thread[tg.activeCount()];

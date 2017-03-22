@@ -31,13 +31,4 @@ public class NullRewriter<T> extends BaseModifier<T> {
         return null;
     }
 
-    @Override
-    public void doStart() {
-
-    }
-
-    @Override
-    public void doStop() {
-
-    }
 }

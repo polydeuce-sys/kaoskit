@@ -26,8 +26,19 @@ public abstract class BaseModifier<T> extends KaosBase implements Modifier<T> {
     protected abstract T doModify( T original );
 
     @Override
-    public final T modify(T original) {
+    public T modify(T original) {
         getMonitor().message(String.format(CALLED_MODIFY, name()));
         return doModify(original);
     }
+
+    @Override
+    public void doStart() {
+// NOOP
+    }
+
+    @Override
+    public void doStop() {
+// NOOP
+    }
+
 }

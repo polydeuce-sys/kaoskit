@@ -48,9 +48,8 @@ public class KaosAppender extends AppenderSkeleton{
 
     @SuppressWarnings("unchecked")
     protected void append(LoggingEvent loggingEvent) {
-        // avoiding recursion rather than thread safety
         try {
-            kaosRunner.causeKaos();
+            kaosRunner.<String>causeKaos(loggingEvent.getMessage().toString());
         } catch (Exception e) {
             kaosRunner.errorHandler().error(e.getMessage(), e);
         }

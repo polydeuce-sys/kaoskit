@@ -75,6 +75,9 @@ public class KaosStrategy<T> implements Strategy<T> {
         @Override
         public synchronized StrategyBuilder addBeforeBehaviour( Behaviour b) {
             if(built) throw new IllegalStateException(ADD_AFTER_COMPLETE);
+            if(b instanceof BaseBehaviour && ((BaseBehaviour) b).getMonitor() == null){
+                ((BaseBehaviour) b).setMonitor(monitor);
+            }
             beforeBehaviours.add(b);
             monitor.message(String.format(ADDED, b.name(), "before Behaviour"));
             return this;
@@ -83,6 +86,9 @@ public class KaosStrategy<T> implements Strategy<T> {
         @Override
         public StrategyBuilder addAfterBehaviour(Behaviour b) {
             if(built) throw new IllegalStateException(ADD_AFTER_COMPLETE);
+            if(b instanceof BaseBehaviour && ((BaseBehaviour) b).getMonitor() == null){
+                ((BaseBehaviour) b).setMonitor(monitor);
+            }
             afterBehaviours.add(b);
             monitor.message(String.format(ADDED, b.name(), "after Behaviour"));
             return this;
@@ -91,6 +97,9 @@ public class KaosStrategy<T> implements Strategy<T> {
         @Override
         public StrategyBuilder addModifier(Modifier m) {
             if(built) throw new IllegalStateException(ADD_AFTER_COMPLETE);
+            if(m instanceof BaseModifier && ((BaseModifier)m).getMonitor() == null){
+                ((BaseModifier)m).setMonitor(monitor);
+            }
             monitor.message(String.format(ADDED, m.name(), "Modifier"));
             modifiers.add(m);
             return this;

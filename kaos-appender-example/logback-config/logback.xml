@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <!-- encoders are  by default assigned the type
+             ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="ServerKaos" class="com.polydeucesys.kaos.KaosAppender">
+        <strategyName>server-thread</strategyName>
+    </appender>
+    <appender name="HbKaos" class="com.polydeucesys.kaos.KaosAppender">
+        <strategyName>hb-thread</strategyName>
+    </appender>
+
+    <logger name="com.polydeucesys.kaos.example.StringSharer$StringServerListenThread" level="debug">
+        <appender-ref ref="ServerKaos"/>
+    </logger>
+    <logger name="com.polydeucesys.kaos.example.Tracker" level="debug">
+        <appender-ref ref="ServerKaos"/>
+    </logger>
+    <logger name="com.polydeucesys.kaos.example.StringSharer$HBThread" level="debug">
+        <appender-ref ref="HbKaos"/>
+    </logger>
+    <root level="info">
+        <appender-ref ref="STDOUT" />
+    </root>
+
+</configuration>

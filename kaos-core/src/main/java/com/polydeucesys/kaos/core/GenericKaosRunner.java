@@ -92,4 +92,16 @@ public class GenericKaosRunner implements Lifecycle{
             }
         }
     }
+
+    public <T> void causeKaos( T value ) throws Exception{
+        if(!isCausingKaos) {
+            try {
+                isCausingKaos = true;
+                kaosStrategy.executeBefore();
+                kaosStrategy.executeAfter(value);
+            } finally {
+                isCausingKaos = false;
+            }
+        }
+    }
 }

@@ -22,15 +22,15 @@ import java.util.Random;
  * Randomly perform a wrapped behaviour a given percentage of the time.
  * Created by kevinmclellan on 30/09/2016.
  */
-public class SometimesBehaviour extends Sometimes implements Behaviour {
+public class SometimesBehaviour<T> extends BaseBehaviour<T> {
     private static final String DID_EXECUTE = "SOMETIMES: Executed %s";
     private static final String DID_NOT_EXECUTE = "SOMETIMES: Did Not Execute %s";
 
-
+    private final Sometimes condition;
     private final BaseBehaviour sometimes;
 
-    SometimesBehaviour(float odds, BaseBehaviour sometimesBehaviour){
-        super(odds);
+    public SometimesBehaviour(float odds, BaseBehaviour sometimesBehaviour){
+        condition = new Sometimes(odds);
         this.sometimes = sometimesBehaviour;
     }
 
@@ -38,25 +38,41 @@ public class SometimesBehaviour extends Sometimes implements Behaviour {
         return sometimes;
     }
 
+    Sometimes condition(){
+        return condition;
+    }
 
     @Override
-    public boolean execute() throws Exception {
-        boolean result =  isPerform() && sometimes.execute();
-        getMonitor().message(String.format(result?DID_EXECUTE:DID_NOT_EXECUTE, name()));
-        return result;    }
-
-    @Override
-    public boolean execute(Object returnValue) throws Exception {
-        return execute();
+    public void setMonitor(Monitor monitor) {
+        super.setMonitor(monitor);
+        sometimes.setMonitor(monitor);
     }
 
     @Override
     public void doStart() {
-        sometimes.doStart();
+        super.doStart();
+        sometimes.start();
     }
 
     @Override
     public void doStop() {
-        sometimes.doStop();
+        super.doStop();
+        sometimes.stop();
     }
+
+
+    @Override
+    public boolean doExecute() throws Exception {
+        boolean result =  condition.isPerform() && sometimes.execute();
+        getMonitor().message(String.format(result?DID_EXECUTE:DID_NOT_EXECUTE, name()));
+        return result;
+    }
+
+    @Override
+    public boolean execute( T returnValue ) throws Exception {
+        boolean result =  condition.isPerform() && sometimes.execute( returnValue );
+        getMonitor().message(String.format(result?DID_EXECUTE:DID_NOT_EXECUTE, name()));
+        return result;
+    }
+
 }

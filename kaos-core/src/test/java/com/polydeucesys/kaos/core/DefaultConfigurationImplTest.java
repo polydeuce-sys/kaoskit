@@ -20,6 +20,7 @@ import com.polydeucesys.kaos.core.behaviours.ExceptionThrower;
 import com.polydeucesys.kaos.core.behaviours.Interrupter;
 import com.polydeucesys.kaos.core.behaviours.RandomSleeper;
 import com.polydeucesys.kaos.core.behaviours.ValueGetter;
+import com.polydeucesys.kaos.core.behaviours.conditions.RegexBehaviour;
 import org.junit.Test;
 
 import java.util.List;
@@ -35,10 +36,10 @@ import static org.junit.Assert.assertTrue;
 public class DefaultConfigurationImplTest {
     @Test
     public void testReadsConfigProperties(){
-        System.setProperty(BEFORE_BEHAVIOURS_KEY, "sleep,throw");
+        System.setProperty(BEFORE_BEHAVIOURS_KEY, "sleep");
         System.setProperty(AFTER_BEHAVIOURS_KEY, "throw, interrupt");
         System.setProperty(SLEEP_PARAMS_KEY, "odds=0.25;max=50");
-        System.setProperty(THROW_PARAMS_KEY, "odds=0.62;throws=java.sql.SQLException,java.rmi.server.ServerNotActiveException");
+        System.setProperty(THROW_PARAMS_KEY, "matches=QueryDB\\s+;odds=0.62;throws=java.sql.SQLException,java.rmi.server.ServerNotActiveException");
         System.setProperty(INTERRUPT_PARAMS_KEY, "states=WAITING,TIMED_WAITING;first=false");
 
         Configuration defConfig = ConfigurationFactory.getInstance().getConfiguration();
@@ -46,22 +47,27 @@ public class DefaultConfigurationImplTest {
         Strategy one = defConfig.strategyForName("BarbequeuBob");
         Strategy two = defConfig.strategyForName("Randimity");
         assertTrue("Not returning constant strategy", one == two);
-        assertTrue(one.beforeBehaviours().size() == 2);
+        assertTrue(one.beforeBehaviours().size() == 1);
         assertTrue(one.afterBehaviours().size() == 2);
         List<Behaviour<?>> befores = one.beforeBehaviours();
         Behaviour<?> s = befores.get(0);
         assertTrue(s instanceof SometimesBehaviour);
         RandomSleeper wrappedSleeper = (RandomSleeper) ((SometimesBehaviour)s).sometimes();
-        assertTrue(0.25f == ((SometimesBehaviour) s).odds());
+        assertTrue(0.25f == ((SometimesBehaviour) s).condition().odds());
         assertTrue(ValueGetter.getMaxSleep(wrappedSleeper) == 50L);
-        SometimesBehaviour s2 = (SometimesBehaviour)befores.get(1);
-        assertTrue(0.62f == ((SometimesBehaviour) s2).odds());
+        List<Behaviour<?>> afters = one.afterBehaviours();
+        IfBehaviour if1 = (IfBehaviour)afters.get(0);
+        RegexBehaviour r1 = (RegexBehaviour) if1.condition();
+        assertEquals("QueryDB\\s+",
+                com.polydeucesys.kaos.core.behaviours.conditions.ValueGetter.
+                        getPattern(r1).pattern());
+        SometimesBehaviour s2 = (SometimesBehaviour)if1.conditionTrue();
+        assertTrue(0.62f == ((SometimesBehaviour) s2).condition().odds());
         ExceptionThrower ex = (ExceptionThrower) s2.sometimes();
         List<Exception> throwables = ValueGetter.getExceptions(ex);
         assertTrue( 2 == throwables.size());
         assertTrue(throwables.get(0) instanceof java.sql.SQLException);
         assertTrue(throwables.get(1) instanceof java.rmi.server.ServerNotActiveException);
-        List<Behaviour<?>> afters = one.afterBehaviours();
         Interrupter i = (Interrupter) afters.get(1);
         assertTrue(!ValueGetter.getFirstMatchOnly(i));
         assertTrue(ValueGetter.getSearchStates(i).contains(Thread.State.WAITING));

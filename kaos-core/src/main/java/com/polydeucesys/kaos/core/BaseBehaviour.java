@@ -37,11 +37,15 @@ public abstract class BaseBehaviour<T> extends KaosBase implements Behaviour<T> 
      */
     public abstract boolean doExecute() throws Exception;
 
+    protected void monitorResult( boolean result ){
+        getMonitor().message(String.format(result?DID_EXECUTE:DID_NOT_EXECUTE, name()));
+    }
+
 
     @Override
     public boolean execute() throws Exception {
         boolean result = doExecute();
-        getMonitor().message(String.format(result?DID_EXECUTE:DID_NOT_EXECUTE, name()));
+        monitorResult(result);
         return result;
     }
 
@@ -50,5 +54,14 @@ public abstract class BaseBehaviour<T> extends KaosBase implements Behaviour<T> 
         return execute();
     }
 
+    @Override
+    public void doStart() {
+// NOOP
+    }
+
+    @Override
+    public void doStop() {
+// NOOP
+    }
 
 }

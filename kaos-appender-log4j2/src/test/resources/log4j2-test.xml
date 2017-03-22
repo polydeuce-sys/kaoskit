@@ -1,12 +1,18 @@
 <Configuration packages="com.polydeucesys.kaos">
     <Appenders>
-        <KaosAppender name="TestAppender">
-            <StrategyName>default</StrategyName>
+        <KaosAppender name="TestAppender1">
+            <StrategyName>test1</StrategyName>
+        </KaosAppender>
+        <KaosAppender name="TestAppender2">
+            <StrategyName>test2</StrategyName>
         </KaosAppender>
     </Appenders>
     <Loggers>
-        <Logger name="UnitTest" level="info" additivity="false">
-            <AppenderRef ref="TestAppender"/>
+        <Logger name="UnitTest1" level="info" additivity="false">
+            <AppenderRef ref="TestAppender1"/>
+        </Logger>
+        <Logger name="UnitTest2" level="info" additivity="false">
+            <AppenderRef ref="TestAppender2"/>
         </Logger>
     </Loggers>
 </Configuration>

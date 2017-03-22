@@ -1,0 +1,120 @@
+group 'com.polydeucesys'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'scala'
+apply plugin: 'application'
+
+// need to have separate tasks for running wiff and waff with appenders and with aspectj
+// could allow jvm opts for appender version
+
+sourceCompatibility = 1.8
+
+configurations{
+    aspectj
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.12.1'
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.7'
+    compile group: 'com.typesafe.scala-logging', name: 'scala-logging_2.12', version: '3.5.0'
+    compile group: 'com.polydeucesys', name: 'kaos-appender-logback', version: '1.0-SNAPSHOT'
+    aspectj group: 'org.aspectj', name: 'aspectjweaver', version: '1.8.10'
+    compile configurations.aspectj.dependencies
+    compile group: 'org.aspectj', name: 'aspectjrt', version: '1.8.10'
+    testCompile group: 'org.scalatest', name: 'scalatest_2.12', version: '3.0.1'
+
+}
+
+task runStringServerOne(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.polydeucesys.kaos.example.StringSharer'
+    standardInput = System.in
+    jvmArgs=['-Dlogback.statusListenerClass=ch.qos.logback.core.status.OnConsoleStatusListener',
+             '-Dlogback.configurationFile=' + file('logback-config/logback.xml').absolutePath,
+             '-Dkaos.string.server.port=9115', '-Dkaos.string.server.id=stringServerOne',
+             '-Dkaos.string.server.wka=stringServerTwo,localhost,9116|stringServerThree,localhost,9117']
+}
+
+task runStringServerOneKaos(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.polydeucesys.kaos.example.StringSharer'
+    standardInput = System.in
+    jvmArgs=['-Dlogback.statusListenerClass=ch.qos.logback.core.status.OnConsoleStatusListener',
+             '-Dcom.polydeucesys.kaos.conf.class=com.polydeucesys.kaos.example.ExampleConfigurationImpl',
+             '-Dlogback.configurationFile=' + file('logback-config/logback.xml').absolutePath,
+             '-Dkaos.string.server.port=9115', '-Dkaos.string.server.id=stringServerOne',
+             '-Dkaos.string.server.wka=stringServerTwo,localhost,9116|stringServerThree,localhost,9117']
+}
+
+task runStringServerOneDebugKaos(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.polydeucesys.kaos.example.StringSharer'
+    standardInput = System.in
+    jvmArgs=['-Dlogback.statusListenerClass=ch.qos.logback.core.status.OnConsoleStatusListener',
+             '-Dcom.polydeucesys.kaos.conf.class=com.polydeucesys.kaos.example.ExampleConfigurationImpl',
+             '-Dlogback.configurationFile=' + file('logback-config/logback.xml').absolutePath,
+             '-Dkaos.string.server.port=9115', '-Dkaos.string.server.id=stringServerOne',
+             '-Dkaos.string.server.wka=stringServerTwo,localhost,9116|stringServerThree,localhost,9117',
+             '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005']
+}
+
+task runStringServerOneAspectKaos(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.polydeucesys.kaos.example.StringSharer'
+    standardInput = System.in
+    jvmArgs=['-javaagent:' + file(configurations.aspectj.asPath),
+             '-Dlogback.statusListenerClass=ch.qos.logback.core.status.OnConsoleStatusListener',
+             '-Dcom.polydeucesys.kaos.conf.class=com.polydeucesys.kaos.example.ExampleConfigurationImpl',
+             '-Dlogback.configurationFile=' + file('logback-config/logback-nokaos.xml').absolutePath,
+             '-Dkaos.string.server.port=9115', '-Dkaos.string.server.id=stringServerOne',
+             '-Dkaos.string.server.wka=stringServerTwo,localhost,9116|stringServerThree,localhost,9117']
+}
+
+task runStringServerOneAspectKaosDebug(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.polydeucesys.kaos.example.StringSharer'
+    standardInput = System.in
+    jvmArgs=['-javaagent:' + file(configurations.aspectj.asPath),
+             '-Dlogback.statusListenerClass=ch.qos.logback.core.status.OnConsoleStatusListener',
+             '-Dcom.polydeucesys.kaos.conf.class=com.polydeucesys.kaos.example.ExampleConfigurationImpl',
+             '-Dlogback.configurationFile=' + file('logback-config/logback-nokaos.xml').absolutePath,
+             '-Dkaos.string.server.port=9115', '-Dkaos.string.server.id=stringServerOne',
+             '-Dkaos.string.server.wka=stringServerTwo,localhost,9116|stringServerThree,localhost,9117',
+             '-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005']
+}
+
+task runStringServerTwo(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.polydeucesys.kaos.example.StringSharer'
+    standardInput = System.in
+    jvmArgs=['-Dlogback.statusListenerClass=ch.qos.logback.core.status.OnConsoleStatusListener',
+             '-Dlogback.configurationFile=' + file('logback-config/logback.xml').absolutePath,
+             '-Dkaos.string.server.port=9116', '-Dkaos.string.server.id=stringServerTwo',
+             '-Dkaos.string.server.wka=stringServerOne,localhost,9115|stringServerThree,localhost,9117']
+}
+
+task runStringServerThree(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.polydeucesys.kaos.example.StringSharer'
+    standardInput = System.in
+    jvmArgs=['-Dlogback.statusListenerClass=ch.qos.logback.core.status.OnConsoleStatusListener',
+             '-Dlogback.configurationFile=' + file('logback-config/logback.xml').absolutePath,
+             '-Dkaos.string.server.port=9117', '-Dkaos.string.server.id=stringServerThree',
+             '-Dkaos.string.server.wka=stringServerOne,localhost,9115|stringServerTwo,localhost,9116']
+}
+
+task runStringServerClient(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    main = 'com.polydeucesys.kaos.example.StringSharerClient'
+    standardInput = System.in
+    jvmArgs=['-Dlogback.statusListenerClass=ch.qos.logback.core.status.OnConsoleStatusListener',
+             '-Dlogback.configurationFile=' + file('logback-config/logback.xml').absolutePath,
+             '-Dkaos.string.client.id=clientOne',
+             '-Dkaos.string.server.wka=stringServerOne,localhost,9115|stringServerTwo,localhost,9116|stringServerThree,localhost,9117']
+}

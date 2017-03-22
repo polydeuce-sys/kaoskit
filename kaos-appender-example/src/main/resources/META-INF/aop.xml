@@ -1,0 +1,12 @@
+<aspectj>
+    <aspects>
+        <aspect name="com.polydeucesys.kaos.example.aspect.StringSharerAspects"></aspect>
+    </aspects>
+    <!-- You can include "-debug"  on the weaver options to see what classes get weaved and what do not -->
+    <weaver options="-XnoInline">
+        <!-- Weaver also needs the aspect class itself! -->
+        <include within="com.polydeucesys.kaos.example.aspect.StringSharerAspects"/>
+        <include within="com.polydeucesys.kaos.example.*"/>
+        <include within="com.polydeucesys.kaos.example.StringSharer$StringServerListenThread"/>
+    </weaver>
+</aspectj>

@@ -20,14 +20,15 @@ package com.polydeucesys.kaos.core;
  * Randomly modify a value a given percentage of the time.
  * Created by kevinmclellan on 30/09/2016.
  */
-public class SometimesModifier<T> extends Sometimes implements Modifier<T> {
+public class SometimesModifier<T> extends BaseModifier<T> {
     private static final String CALLED_MODIFY = "Called modify on %s";
     private static final String NOT_CALLED_MODIFY = "Did not call modify on %s";
 
+    private final Sometimes condition;
     private final Modifier<T> sometimes;
 
-    SometimesModifier(float odds, Modifier<T> sometimes) {
-        super(odds);
+    public SometimesModifier(float odds, Modifier<T> sometimes) {
+        condition = new Sometimes(odds);
         this.sometimes = sometimes;
     }
 
@@ -36,10 +37,11 @@ public class SometimesModifier<T> extends Sometimes implements Modifier<T> {
     }
 
     @Override
-    public T modify(T original) {
-        boolean modify = isPerform();
-        T res = isPerform()?sometimes.modify(original):original;
-        getMonitor().message(String.format(modify?CALLED_MODIFY:NOT_CALLED_MODIFY, name()));
-        return res;
+    protected T doModify(T original) {
+        if( condition.isPerform()){
+            return sometimes.modify(original);
+        }else{
+            return original;
+        }
     }
 }

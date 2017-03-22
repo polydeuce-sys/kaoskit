@@ -17,6 +17,7 @@ package com.polydeucesys.kaos.core.behaviours;
  */
 
 import com.polydeucesys.kaos.core.Monitor;
+import org.junit.Ignore;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -43,6 +44,8 @@ public class InterrupterTest {
         }
     };
 
+    @Ignore("This can be run from some IDEs, but actually seems to kill command line Gradle, " +
+            "because there may be code not handling InterruptedException there")
     @Test
     public void interruptWaitingTest(){
         final AtomicBoolean flag = new AtomicBoolean(false);
