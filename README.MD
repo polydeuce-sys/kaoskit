@@ -22,10 +22,10 @@ not be usable. For example, when using the KaosAppender implementations, there w
 By default, configuration is set using a number of system properties to define the list of before and after
 behaviours (see the test classes for the log appenders for examples). The configuration class can be overridden
 by setting the value of the "com.polydeucesys.kaos.conf.class" property to an appropriate implementation of
-the "com.polydeucesys.kaos.core.Configuration" interface.
+the `com.polydeucesys.kaos.core.Configuration` interface.
 
 ### Log4J 1.2.x, Logback, Log4j 2.x
-An implementation for "com.polydeucesys.kaos.KaosAppender" is provided for each of the three major logging
+An implementation for `com.polydeucesys.kaos.KaosAppender` is provided for each of the three major logging
 frameworks. In each case, the appender will run both its' before and after behaviours on a call to append.
 The appender will not call itself recursively. If it is configured to have an ExceptionThrower behaviour, then
 this must throw a RuntimeException (as the append method does not declare checked exceptions). RuntimeExceptions
@@ -34,8 +34,3 @@ will be rethrown by the appender or appropriate error handling class depending o
 ### Aspect Oriented
 In order to make use of facilities like Modifier instances and have more fine grained control over exception
 throwing Aspect Oritented tools or similar bytecode level integrations can be used.
-
-
-### TODO:
-Update appenders to allow use of modifiers as a means not of modifying a log message, but of triggering
-behaviour based on the message (regex on message). Add option to use this.
