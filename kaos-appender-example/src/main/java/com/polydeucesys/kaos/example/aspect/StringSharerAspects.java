@@ -55,13 +55,20 @@ public class StringSharerAspects {
     @Around("readLinePointcut(msg)")
     public Object modifyMessage( ProceedingJoinPoint pjp, String msg ) throws Throwable{
         Strategy<String> strategy = ConfigurationFactory.getInstance().getConfiguration().strategyForName("msg-aspect");
+        for(Behaviour before : strategy.beforeBehaviours()){
+            before.execute();
+        }
         String work = msg;
         Object[] args = pjp.getArgs();
         for(Modifier<String> m : strategy.modifiers()){
             work = m.modify(work);
         }
         args[0] = work;
-        return pjp.proceed(args);
+        Object res = pjp.proceed(args);
+        for(Behaviour after : strategy.afterBehaviours()){
+            after.execute();
+        }
+        return res;
     }
 
     /*

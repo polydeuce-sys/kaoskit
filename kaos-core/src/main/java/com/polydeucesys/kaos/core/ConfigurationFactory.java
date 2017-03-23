@@ -25,6 +25,9 @@ public enum ConfigurationFactory {
     public static final String CONFIGURATION_CLASS_KEY = "com.polydeucesys.kaos.conf.class";
 
     // Keys used in default implementation
+    /**
+     * This property
+     */
     public static final String BEFORE_BEHAVIOURS_KEY = "com.polydeucesys.kaos.conf.default.before";
     public static final String AFTER_BEHAVIOURS_KEY = "com.polydeucesys.kaos.conf.default.after";
     public static final String SLEEP_PARAMS_KEY = "com.polydeucesys.kaos.conf.default.sleep.params";

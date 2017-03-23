@@ -19,7 +19,7 @@ package com.polydeucesys.kaos.core;
 import java.util.Map;
 
 /**
- * An abstrction over Logging or other form of monitoring. As the core is used to implement
+ * An abstraction over Logging or other form of monitoring. As the core is used to implement
  * Appenders under each of the three major logging frameworks, concrete Logging calls would
  * require separate implementation of a TestAppender type of class to collect information
  * for unit and integration tests. By abstracting with at the framework, as single custom

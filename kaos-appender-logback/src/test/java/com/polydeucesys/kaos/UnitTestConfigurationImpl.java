@@ -32,16 +32,6 @@ import java.util.Map;
  * Created by kevinmclellan on 07/02/2017.
  */
 public class UnitTestConfigurationImpl implements Configuration {
-    // strategy test1 matches:
-    //System.setProperty(BEFORE_BEHAVIOURS_KEY, "sleep");
-    //System.setProperty(AFTER_BEHAVIOURS_KEY, "throw");
-    //System.setProperty(SLEEP_PARAMS_KEY, "max=50");
-    //System.setProperty(THROW_PARAMS_KEY, "odds=1.0;throws=javax.xml.ws.WebServiceException,java.nio.file.FileSystemNotFoundException");
-    //System.setProperty(MONITOR_CLASS_KEY,StringListMonitor.class.getCanonicalName());
-    // strategy test2 matches:
-    // System.setProperty(AFTER_BEHAVIOURS_KEY, "throw");
-    // System.setProperty(THROW_PARAMS_KEY, "matches=^DoThrow;throws=javax.xml.ws.WebServiceException,java.nio.file.FileSystemNotFoundException");
-    // System.setProperty(MONITOR_CLASS_KEY,StringListMonitor.class.getCanonicalName());
 
     private final Map<String, Strategy> strategies = new HashMap<String, Strategy>();
 

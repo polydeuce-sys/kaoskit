@@ -16,6 +16,8 @@ package com.polydeucesys.kaos.core;
  * limitations under the License.
  */
 
+import java.util.Map;
+
 /**
  * Base class used for Behaviour and Modifier implementations in this framework.
  * Created by kevinmclellan on 03/10/2016.
@@ -26,7 +28,8 @@ public abstract class KaosBase implements Monitorable {
     private static final String STOPPED = "Stopped %s";
 
 
-    private Monitor monitor;
+    private Monitor monitor = new NoOpMonitor();
+
     private volatile boolean started = false;
 
     public abstract void doStart();
