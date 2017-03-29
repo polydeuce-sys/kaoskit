@@ -44,4 +44,16 @@ public class SometimesModifier<T> extends BaseModifier<T> {
             return original;
         }
     }
+
+    @Override
+    public void doStart() {
+        super.doStart();
+        sometimes.start();
+    }
+
+    @Override
+    public void doStop() {
+        super.doStop();
+        sometimes.stop();
+    }
 }

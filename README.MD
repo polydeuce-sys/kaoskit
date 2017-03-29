@@ -62,6 +62,10 @@ behaviours) with `@Around` pointcuts. For example:
     @Around("readLinePointcut(msg)")
     public Object modifyMessage( ProceedingJoinPoint pjp, String msg ) throws Throwable{
         Strategy<String> strategy = ConfigurationFactory.getInstance().getConfiguration().strategyForName("msg-aspect");
+        if(!isReadStarted){
+            strategy.start();
+            isReadStarted = true;
+        }
         for(Behaviour before : strategy.beforeBehaviours()){
             before.execute();
         }
@@ -81,13 +85,34 @@ behaviours) with `@Around` pointcuts. For example:
 #### Behaviour
 A `Behaviour` simply defines an action that can be taken, such as calling `sleep` on the current thread,
 interrupting other waiting threads, or throwing an exception. `Behaviour` defines both an `void execute()` and
-`<T> void execute(T arg)`. The latter being used to create conditional execution of behaviours
+`<T> void execute(T arg)`. The latter being used for exaple to create conditional execution of behaviours
 (via the `IfBehaviour` wrapper class).
 
 #### Modifier
 A `Modifier` defines and action which can take an input of some type `T` and return an output of the same type.
 As an example use case, this could be used to simulate a change to the format of data received from a 3rd party,
 for example an addition of a field to Json data returned by a REST service call.
+
+#### Conditionals, If and Sometimes
+Although not in the core interfaces, it is worth being aware of the flow control implementation available
+as well. Both `Behaviour` and `Modifier` instances can be wrapped in flow control constructs. The `Sometimes`
+constructs provide a wrapper which will choose to execute the wrapped interface randomly based on a probability
+set in the constructor. The `IfBehaviour` and `IfModifier` take a condition, a true and a false. If the condition
+evaluates to true, the wrapped 'true' behaviour/modifier is called, otherwis the 'false' is called.
+
+The condition is a `Behaviour` which is called with the :
+        @Override
+        public boolean execute( T returnValue ) throws Exception
+
+method. The condition will return true if the `returnValue` is accepted by the condition. See the various
+implementations in the `com.polydeucesys.kaos.core.behaviours.conditions` package for examples.
+
+#### Component Lifecycle
+The supplied `Behaviour` and `Modifier` implementations operate independantly of any outside input or
+influence. However, in order to support instances which may use resources, all components implements the
+`Lifecycle` interface, which defines a start` and `stop` method. These methods are called in the log
+appender implementations at the corresponding points in the appender lifecycle. When using AOP
+or other implementations it is possible/advisable to call these lifecycle mathods as appropriate.
 
 ### Configuration
 Configuration of KaosKit is done by either supplying a concrete implementation of the `Configuration` interface,
@@ -168,7 +193,7 @@ appender unit tests:
         }
     }
 
-### Log4J 1.2.x, Logback, Log4j 2.x
+### Log4J 1.2.x, Log4j 2.x, Logback
 An implementation for `com.polydeucesys.kaos.KaosAppender` is provided for each of the three major logging
 frameworks. In each case, the appender will run both its' before and after behaviours on a call to append.
 The appender will not call itself recursively. If it is configured to have an ExceptionThrower behaviour, then
@@ -177,4 +202,73 @@ will be rethrown by the appender or appropriate error handling class depending o
 
 ### Aspect Oriented
 In order to make use of facilities like Modifier instances and have more fine grained control over exception
-throwing Aspect Oritented tools or similar bytecode level integrations can be used.
+throwing Aspect Oritented tools or similar bytecode level integrations can be used. For pre-existing installations
+run time weaving can be used to enable the KaosKit strategies in various pointcuts.
+
+See the `kaos-appender-example` for examples of usage.
+
+
+### Example Project
+The (slightly misnamed) `kaos-appender-example` project provides a set of examples of how to configure and use
+the KaosKit. The example itself is a simple Scala application which forms a cluster based on a Well Known
+Address List of members, and a client appliction which communicates with the cluster, load balancing its'
+messages by sending them to random cluster members. When a cluster member receives a client message it
+propagates it to the other cluster members. In addition he cluster members track each others 'aliveness'
+by using heartbeat messages.
+
+*The code is intentionally not that well written*
+
+The idea being that we can demonstrate problems which pass unit testing and can run happily for some extended
+time, but which could eventually cause serious issues. There are several Gradle tasks which can be used to run
+the example servers and client in different modes.
+
+    runStringServerOne - Start the first server without the KaosKit enabled
+    runStringServerTwo - Start the second server without the KaosKit enabled
+    runStringServerThree - Start the third server without te KaosKit enabled
+
+    runStringServerOneKaos - Start the first server with KaosKit enabled as log appenders
+    runStringServerOneKaosDebug - KaosKit enabled as log appenders and remote debug options
+
+    runStringServerOneAspectKaos - Start the first server with KaosKit enabled via AOP
+    runStringServerOneAspectKaosDebug - KaosKit via AOP and remote debug (suspend=y) enabled
+
+With KaosKit enabled, the servers very quickly run in to trouble. By changing the behaviours and modifiers in
+the `com.polydeucesys.kaos.example.ExampleConfigurationImpl` you can experiment with how different problems
+with the server can impact the cluster.
+
+
+#### Some notes on AOP
+Having not previously used AspectJ much meant there were some tiny things to be aware of in order to get
+it working. So as a note to save some searching on the internet:
+
+1. Note how the aspectj weaving jar is referenced in the `build.gradle`:
+    dependencies{
+        ...
+        aspectj group: 'org.aspectj', name: 'aspectjweaver', version: '1.8.10'
+        compile configurations.aspectj.dependencies
+        ...
+    }
+By being is' own configuration, it can later be referenced in the task to run the server with AOP as follows:
+    jvmArgs=['-javaagent:' + file(configurations.aspectj.asPath)
+
+2. Note in the aop.xml file:
+    <aspectj>
+        <aspects>
+            <aspect name="com.polydeucesys.kaos.example.aspect.StringSharerAspects"></aspect>
+        </aspects>
+        <!-- You can include "-debug"  on the weaver options to see what classes get weaved and what do not -->
+        <weaver options="-XnoInline">
+            <!-- Weaver also needs the aspect class itself! -->
+            <include within="com.polydeucesys.kaos.example.aspect.StringSharerAspects"/>
+            <include within="com.polydeucesys.kaos.example.*"/>
+            <include within="com.polydeucesys.kaos.example.StringSharer$StringServerListenThread"/>
+        </weaver>
+    </aspectj>
+You must include your aspect class itself under the weaver. Setting `-debug` in the weaver will show which
+classes get woven and which do not. This can be critical when figuring out why aspects do not seem to work.
+
+3. Only the classes in the aop.xml will be affected. So you can put pointcuts on things like `println` or `read`
+methods on streams and not have them blow up everywhere, but in calls directly in your code.
+
+4. Not you can pointcut a `call` to something you not specified in the `weaver` section of `aop.xml`, as the
+call can occour in a woven class, but not on an `execution`, as the execution is in the target.

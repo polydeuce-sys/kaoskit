@@ -52,7 +52,7 @@ task runStringServerOneKaos(type: JavaExec) {
              '-Dkaos.string.server.wka=stringServerTwo,localhost,9116|stringServerThree,localhost,9117']
 }
 
-task runStringServerOneDebugKaos(type: JavaExec) {
+task runStringServerOneKaosDebug(type: JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     main = 'com.polydeucesys.kaos.example.StringSharer'
     standardInput = System.in

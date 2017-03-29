@@ -34,6 +34,9 @@ import java.io.IOException;
  */
 @Aspect
 public class StringSharerAspects {
+    private volatile boolean isReadStarted = false;
+    private volatile boolean isWriteStarted = false;
+
     /*
      * This pointcut will be used to add a modifer. The modified will simulate a change to
      * the message format. For example if a 3rd party service was called by our code, and the 3rd
@@ -55,6 +58,10 @@ public class StringSharerAspects {
     @Around("readLinePointcut(msg)")
     public Object modifyMessage( ProceedingJoinPoint pjp, String msg ) throws Throwable{
         Strategy<String> strategy = ConfigurationFactory.getInstance().getConfiguration().strategyForName("msg-aspect");
+        if(!isReadStarted){
+            strategy.start();
+            isReadStarted = true;
+        }
         for(Behaviour before : strategy.beforeBehaviours()){
             before.execute();
         }
@@ -88,6 +95,10 @@ public class StringSharerAspects {
     @Around("writeSocketPointcut(msg)")
     public Object handleBehaviour(ProceedingJoinPoint pjp, String msg) throws IOException{
         Strategy<String> strategy = ConfigurationFactory.getInstance().getConfiguration().strategyForName("write-aspect");
+        if(!isWriteStarted){
+            strategy.start();
+            isWriteStarted = true;
+        }
         for(Behaviour<String> b : strategy.beforeBehaviours()){
             try {
                 b.execute();

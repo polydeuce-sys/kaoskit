@@ -26,6 +26,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static com.polydeucesys.kaos.core.ConfigurationFactory.*;
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -41,38 +42,79 @@ public class DefaultConfigurationImplTest {
         System.setProperty(SLEEP_PARAMS_KEY, "odds=0.25;max=50");
         System.setProperty(THROW_PARAMS_KEY, "matches=QueryDB\\s+;odds=0.62;throws=java.sql.SQLException,java.rmi.server.ServerNotActiveException");
         System.setProperty(INTERRUPT_PARAMS_KEY, "states=WAITING,TIMED_WAITING;first=false");
+        try {
+            Configuration defConfig = ConfigurationFactory.getInstance().getConfiguration();
+            assertTrue("Does not return default config class", defConfig instanceof DefaultConfigurationImpl);
+            Strategy one = defConfig.strategyForName("BarbequeuBob");
+            Strategy two = defConfig.strategyForName("Randimity");
+            assertTrue("Not returning constant strategy", one == two);
+            assertTrue(one.beforeBehaviours().size() == 1);
+            assertTrue(one.afterBehaviours().size() == 2);
+            List<Behaviour<?>> befores = one.beforeBehaviours();
+            Behaviour<?> s = befores.get(0);
+            assertTrue(s instanceof SometimesBehaviour);
+            RandomSleeper wrappedSleeper = (RandomSleeper) ((SometimesBehaviour) s).sometimes();
+            assertTrue(0.25f == ((SometimesBehaviour) s).condition().odds());
+            assertTrue(ValueGetter.getMaxSleep(wrappedSleeper) == 50L);
+            List<Behaviour<?>> afters = one.afterBehaviours();
+            IfBehaviour if1 = (IfBehaviour) afters.get(0);
+            RegexBehaviour r1 = (RegexBehaviour) if1.condition();
+            assertEquals("QueryDB\\s+",
+                    com.polydeucesys.kaos.core.behaviours.conditions.ValueGetter.
+                            getPattern(r1).pattern());
+            SometimesBehaviour s2 = (SometimesBehaviour) if1.conditionTrue();
+            assertTrue(0.62f == ((SometimesBehaviour) s2).condition().odds());
+            ExceptionThrower ex = (ExceptionThrower) s2.sometimes();
+            List<Exception> throwables = ValueGetter.getExceptions(ex);
+            assertTrue(2 == throwables.size());
+            assertTrue(throwables.get(0) instanceof java.sql.SQLException);
+            assertTrue(throwables.get(1) instanceof java.rmi.server.ServerNotActiveException);
+            Interrupter i = (Interrupter) afters.get(1);
+            assertTrue(!ValueGetter.getFirstMatchOnly(i));
+            assertTrue(ValueGetter.getSearchStates(i).contains(Thread.State.WAITING));
+            assertTrue(ValueGetter.getSearchStates(i).contains(Thread.State.TIMED_WAITING));
+            assertFalse(ValueGetter.getSearchStates(i).contains(Thread.State.BLOCKED));
+        }finally{
+            System.clearProperty(BEFORE_BEHAVIOURS_KEY);
+            System.clearProperty(AFTER_BEHAVIOURS_KEY);
+            System.clearProperty(SLEEP_PARAMS_KEY);
+            System.clearProperty(THROW_PARAMS_KEY);
+            System.clearProperty(INTERRUPT_PARAMS_KEY);
+        }
+    }
 
-        Configuration defConfig = ConfigurationFactory.getInstance().getConfiguration();
-        assertTrue("Does not return default config class", defConfig instanceof DefaultConfigurationImpl);
-        Strategy one = defConfig.strategyForName("BarbequeuBob");
-        Strategy two = defConfig.strategyForName("Randimity");
-        assertTrue("Not returning constant strategy", one == two);
-        assertTrue(one.beforeBehaviours().size() == 1);
-        assertTrue(one.afterBehaviours().size() == 2);
-        List<Behaviour<?>> befores = one.beforeBehaviours();
-        Behaviour<?> s = befores.get(0);
-        assertTrue(s instanceof SometimesBehaviour);
-        RandomSleeper wrappedSleeper = (RandomSleeper) ((SometimesBehaviour)s).sometimes();
-        assertTrue(0.25f == ((SometimesBehaviour) s).condition().odds());
-        assertTrue(ValueGetter.getMaxSleep(wrappedSleeper) == 50L);
-        List<Behaviour<?>> afters = one.afterBehaviours();
-        IfBehaviour if1 = (IfBehaviour)afters.get(0);
-        RegexBehaviour r1 = (RegexBehaviour) if1.condition();
-        assertEquals("QueryDB\\s+",
-                com.polydeucesys.kaos.core.behaviours.conditions.ValueGetter.
-                        getPattern(r1).pattern());
-        SometimesBehaviour s2 = (SometimesBehaviour)if1.conditionTrue();
-        assertTrue(0.62f == ((SometimesBehaviour) s2).condition().odds());
-        ExceptionThrower ex = (ExceptionThrower) s2.sometimes();
-        List<Exception> throwables = ValueGetter.getExceptions(ex);
-        assertTrue( 2 == throwables.size());
-        assertTrue(throwables.get(0) instanceof java.sql.SQLException);
-        assertTrue(throwables.get(1) instanceof java.rmi.server.ServerNotActiveException);
-        Interrupter i = (Interrupter) afters.get(1);
-        assertTrue(!ValueGetter.getFirstMatchOnly(i));
-        assertTrue(ValueGetter.getSearchStates(i).contains(Thread.State.WAITING));
-        assertTrue(ValueGetter.getSearchStates(i).contains(Thread.State.TIMED_WAITING));
-        assertFalse(ValueGetter.getSearchStates(i).contains(Thread.State.BLOCKED));
-
+    @Test
+    public void testInvalidConfig(){
+        System.setProperty(BEFORE_BEHAVIOURS_KEY, "sleep");
+        System.setProperty(AFTER_BEHAVIOURS_KEY, "throw, interrupt");
+        System.setProperty(SLEEP_PARAMS_KEY, "odds=0.25;max=-50");
+        System.setProperty(THROW_PARAMS_KEY, "matches=QueryDB\\s+;odds=0.62;throws=java.sql.SQLException,java.rmi.server.ServerNotActiveException");
+        System.setProperty(INTERRUPT_PARAMS_KEY, "states=WAITING,TIMED_WAITING;first=false");
+        Configuration defConfig = null;
+        try{
+            DefaultConfigurationImpl.initConfig();
+            fail();
+        }catch(ConfigurationException t){
+            assertTrue(true);
+            // we want this
+        }
+        System.setProperty(SLEEP_PARAMS_KEY, "odds=0.25;max=50");
+        System.setProperty(INTERRUPT_PARAMS_KEY, "states=WAFFLING,TIMED_WAITING;first=false");
+        try{
+            DefaultConfigurationImpl.initConfig();
+            fail();
+        }catch(ConfigurationException t){
+            // we want this
+            assertTrue(true);
+        }
+        System.setProperty(INTERRUPT_PARAMS_KEY, "states=WAITING,TIMED_WAITING;first=false");
+        System.setProperty(THROW_PARAMS_KEY, "matches=QueryDB\\s+;odds=0.62;throws=java.sql.SquirrelException");
+        try{
+            DefaultConfigurationImpl.initConfig();
+            fail();
+        }catch(ConfigurationException t){
+            // we want this
+            assertTrue(true);
+        }
     }
 }

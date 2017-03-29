@@ -3,12 +3,16 @@ package com.polydeucesys.kaos.core.behaviours;
 import com.polydeucesys.kaos.core.Monitor;
 import com.polydeucesys.kaos.core.NullMonitor;
 import com.polydeucesys.kaos.core.RandomReset;
+import com.polydeucesys.kaos.core.UnitTestConfigurationImpl;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.polydeucesys.kaos.core.ConfigurationFactory.CONFIGURATION_CLASS_KEY;
 import static org.junit.Assert.*;
 
 /*
@@ -41,26 +45,39 @@ public class ExceptionThrowerTest {
 
     }
 
+    @Before
+    public void setConfigFactory(){
+        System.setProperty("com.polydeucesys.kaos.test.rand.seq",
+                "0.74,0.221,0.51,0.799");
+        RandomReset.resetRandom();
+    }
+
+    @After
+    public void cleanProps(){
+        System.clearProperty("com.polydeucesys.kaos.test.rand.seq");
+        RandomReset.resetRandom();
+    }
+
+
     @Test
     public void testDoesThrow(){
         // probability is uniform, so chance of 0 is split between chance of
         // high and low. so for 2 it is 0.25 -> 0, 0.25-0.75 -> 1, 0.75-1.0->0
-        System.setProperty("com.polydeucesys.kaos.test.rand.seq",
-                "0.74,0.221,0.51,0.799");
-        RandomReset.resetRandom();
+
         List<Exception> le = new ArrayList<>();
         le.add(new TestException1());
         le.add(new TestException2());
         // 0.75
         ExceptionThrower et = new ExceptionThrower(le);
         et.setMonitor(new NullMonitor());
+        et.start();
         try{
             boolean res = et.execute();
             fail("Should throw");
         }catch( TestException2 te2){
 
         }catch(Exception ex){
-            fail("Wrong exception");
+            fail("Wrong exception " + ex);
         }
         // 0.221
         try{
@@ -69,7 +86,7 @@ public class ExceptionThrowerTest {
         }catch( TestException1 te1){
 
         }catch(Exception ex){
-            fail("Wrong exception");
+            fail("Wrong exception " + ex);
         }
         // 0.51
         try{
@@ -78,7 +95,7 @@ public class ExceptionThrowerTest {
         }catch( TestException2 te2){
 
         }catch(Exception ex){
-            fail("Wrong exception");
+            fail("Wrong exception " + ex);
         }
         // 0.4999
         try{
@@ -87,8 +104,8 @@ public class ExceptionThrowerTest {
         }catch( TestException1 te1){
 
         }catch(Exception ex){
-            fail("Wrong exception");
+            fail("Wrong exception " + ex);
         }
-
+        et.stop();
     }
 }

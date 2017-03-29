@@ -1,6 +1,6 @@
 package com.polydeucesys.kaos.core.behaviours;
 /*
- * Copyright (c) 2016 Polydeuce-Sys Ltd
+ * Copyright (c) 2017 Polydeuce-Sys Ltd
  *  
  *
  *       Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,25 +16,29 @@ package com.polydeucesys.kaos.core.behaviours;
  *       limitations under the License.
  */
 
-import com.polydeucesys.kaos.core.Monitor;
 import com.polydeucesys.kaos.core.RandomReset;
+import com.polydeucesys.kaos.core.SometimesBehaviour;
+import com.polydeucesys.kaos.core.SometimesModifier;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static junit.framework.TestCase.assertNull;
+import static junit.framework.TestCase.fail;
+import static org.junit.Assert.assertNotNull;
 
 /**
- * Created by kevinmclellan on 12/10/2016.
+ * Created by kevinmclellan on 28/03/2017.
  */
-public class RandomSleeperTest {
+public class SometimeBehaviourTest {
+
     @Before
     public void setConfigFactory(){
         System.setProperty("com.polydeucesys.kaos.test.rand.seq",
-                "0.32, 0.25, 0.2");
+                "0.32, 0.25, 0.2, 0.54");
         RandomReset.resetRandom();
     }
 
@@ -44,47 +48,34 @@ public class RandomSleeperTest {
         RandomReset.resetRandom();
     }
 
+
     @Test
-    public void testSleepsAboutRight(){
+    public void testSometimeBehaviour(){
+        List<Exception> le = new ArrayList<>();
+        le.add(new ExceptionThrowerTest.TestException1());
+        ExceptionThrower et = new ExceptionThrower(le);
 
-        RandomReset.resetRandom();
-        RandomSleeper s1 = new RandomSleeper();
-        RandomSleeper s2 = new RandomSleeper(1000L);
-        Monitor testMonitor = new Monitor(){
-            @Override
-            public void message(String message) {
-
-            }
-
-            @Override
-            public void message(String message, Map<String, String> context) {
-
-            }
-        };
-        s1.setMonitor(testMonitor);
-        s1.start();
-        s2.setMonitor(testMonitor);
-        s2.start();
-        long tstart = System.currentTimeMillis();
+        SometimesBehaviour<String> sn = new SometimesBehaviour<>(0.23f, et);
+        sn.start();
+        // our random seq is : "0.32, 0.25, 0.2, 0.57" this uses 2 nums per iteration as
+        // exception thrower uses one as well
         try {
-            s1.execute();
-            assertTrue(s1.lastSleep() == 32L);
+            sn.execute();
         } catch (Exception e) {
-            fail(e.getMessage());
+            fail();
         }
         try {
-            s2.execute();
-            assertTrue(s2.lastSleep() == 250);
+            // 0.25 is not in the odds. didn't pick exception so only rolled once!).
+            sn.execute();
         } catch (Exception e) {
-            fail(e.getMessage());
+            fail();
         }
         try {
-            s1.execute();
-            assertTrue(s1.lastSleep() == 20L);
+            // 0.2 is not in the odds. didn't pick exception so only rolled once!).
+            sn.execute();
+            fail();
         } catch (Exception e) {
-            fail(e.getMessage());
         }
-        s1.stop();
-        s2.stop();
+        sn.stop();
     }
 }

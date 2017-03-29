@@ -64,10 +64,6 @@ class DefaultConfigurationImpl implements Configuration {
     private static Map<String, Strategy> defaultMap;
 
 
-    static {
-        initConfig();
-    }
-
     private static Monitor buildMonitor(){
         String monitorClazz = System.getProperty(MONITOR_CLASS_KEY, "");
         Monitor m = null;
@@ -127,7 +123,7 @@ class DefaultConfigurationImpl implements Configuration {
                 try {
                     Exception nextEx = (Exception) Class.forName(exClazz.trim()).newInstance();
                     canThrow.add(nextEx);
-                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                } catch (NoClassDefFoundError | InstantiationException | IllegalAccessException | ClassNotFoundException e) {
                     throw new ConfigurationException(e.getMessage(), e);
                 }
             }
@@ -158,7 +154,11 @@ class DefaultConfigurationImpl implements Configuration {
                     interruptParamMap.get(STATES).split(","):(new String[]{});
             Set<Thread.State> searchStates = new TreeSet<>();
             for(String state : states){
-                searchStates.add(Thread.State.valueOf(state));
+                try {
+                    searchStates.add(Thread.State.valueOf(state));
+                }catch( IllegalArgumentException | NoClassDefFoundError c){
+                    throw new ConfigurationException("Invalid state " + state + " for interrupter", c);
+                }
             }
             boolean firstOnly = !interruptParamMap.containsKey(ONLY_FIRST) || Boolean.parseBoolean(interruptParamMap.get(ONLY_FIRST));
             interruptBehaviour = new Interrupter(searchStates, firstOnly);

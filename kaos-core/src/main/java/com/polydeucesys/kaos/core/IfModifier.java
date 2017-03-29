@@ -77,4 +77,20 @@ public class IfModifier<T> extends BaseModifier<T> {
         }
         return modified;
     }
+
+    @Override
+    public void doStart() {
+        super.doStart();
+        condition.doStart();
+        conditionTrue.doStart();
+        conditionFalse.doStart();
+    }
+
+    @Override
+    public void doStop() {
+        super.doStop();
+        condition.doStop();
+        conditionTrue.doStop();
+        conditionFalse.doStop();
+    }
 }

@@ -24,19 +24,20 @@ import java.util.Random;
  * Created by kevinmclellan on 07/10/2016.
  */
 public class RandomGenerator {
-    private static final NextDouble gen;
+    private static NextDouble gen;
     private static final String TEST_SEQ_KEY = "com.polydeucesys.kaos.test.rand.seq";
 
     static {
+        init();
+    }
+
+    static void init(){
         String testSeqStr = System.getProperty(TEST_SEQ_KEY,"");
         if(testSeqStr.isEmpty()){
             gen = new SimpleRandom();
         }else{
             gen = new SequenceGenerator(testSeqStr);
         }
-    }
-
-    static void init(){
         gen.init();
     }
 

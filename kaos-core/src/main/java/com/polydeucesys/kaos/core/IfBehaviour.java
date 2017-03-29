@@ -81,6 +81,7 @@ public class IfBehaviour<T> extends BaseBehaviour<T> {
 
     @Override
     public void doStart() {
+        super.doStart();
         condition.doStart();
         conditionTrue.doStart();
         conditionFalse.doStart();
@@ -88,6 +89,7 @@ public class IfBehaviour<T> extends BaseBehaviour<T> {
 
     @Override
     public void doStop() {
+        super.doStop();
         condition.doStop();
         conditionTrue.doStop();
         conditionFalse.doStop();

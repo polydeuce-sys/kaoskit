@@ -155,8 +155,7 @@ public class KaosStrategy<T> implements Strategy<T> {
     }
 
     private void stopList( List stopList){
-        final List<Lifecycle> stopping = new ArrayList<>(stopList.size());
-        Collections.copy(stopping, stopList);
+        final List<Lifecycle> stopping = new ArrayList<>(stopList);
         Collections.reverse(stopping);
         for (Lifecycle l : stopping) {
             l.stop();
@@ -168,9 +167,9 @@ public class KaosStrategy<T> implements Strategy<T> {
      */
     public void stop() {
         synchronized(strategyLock) {
-            stopList(beforeBehaviours);
-            stopList(afterBehaviours);
-            stopList(modifiers);
+            if(beforeBehaviours.size() > 0) stopList(beforeBehaviours);
+            if(afterBehaviours.size() > 0) stopList(afterBehaviours);
+            if(modifiers.size() > 0) stopList(modifiers);
             started = false;
         }
     }
@@ -195,6 +194,7 @@ public class KaosStrategy<T> implements Strategy<T> {
     }
 
     public void executeBefore() throws Exception{
+        if(!started) throw new IllegalStateException("Strategy not in running state");
         for( Behaviour b : beforeBehaviours){
             if(started)
                 b.execute();
@@ -204,6 +204,7 @@ public class KaosStrategy<T> implements Strategy<T> {
     @SuppressWarnings("unchecked")
     @Override
     public void executeAfter(T returnValue) throws Exception {
+        if(!started) throw new IllegalStateException("Strategy not in running state");
         for( Behaviour b : afterBehaviours){
             if(started)
                 b.execute(returnValue);

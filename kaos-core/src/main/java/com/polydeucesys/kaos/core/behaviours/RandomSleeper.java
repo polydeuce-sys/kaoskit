@@ -1,6 +1,7 @@
 package com.polydeucesys.kaos.core.behaviours;
 
 import com.polydeucesys.kaos.core.BaseBehaviour;
+import com.polydeucesys.kaos.core.ConfigurationException;
 import com.polydeucesys.kaos.core.RandomGenerator;
 
 import java.util.Random;
@@ -27,6 +28,7 @@ import java.util.Random;
  * Created by kevinmclellan on 14/09/2016.
  */
 public class RandomSleeper extends BaseBehaviour {
+    private static final String INVALID_MAX_FMT = "Invalid max sleep time %d. Must be > 0";
     private final long maxSleep;
 
     public RandomSleeper(){
@@ -34,6 +36,7 @@ public class RandomSleeper extends BaseBehaviour {
     }
 
     public RandomSleeper( long maxSleep ){
+        if(maxSleep < 0) throw new ConfigurationException(String.format(INVALID_MAX_FMT, maxSleep));
         this.maxSleep = maxSleep;
     }
 

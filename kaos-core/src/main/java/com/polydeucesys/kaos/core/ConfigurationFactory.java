@@ -57,6 +57,10 @@ public enum ConfigurationFactory {
                 throw new ConfigurationException(CONFIGURATION_FAIED_STRING,e);
             }
         }
-        return (impl==null?new DefaultConfigurationImpl():impl);
+        if (impl == null) {
+            DefaultConfigurationImpl.initConfig();
+            impl = new DefaultConfigurationImpl();
+        }
+        return impl;
     }
 }

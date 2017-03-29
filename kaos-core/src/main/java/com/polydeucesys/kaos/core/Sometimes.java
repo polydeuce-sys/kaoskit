@@ -24,9 +24,12 @@ import java.util.Random;
  * Created by kevinmclellan on 03/10/2016.
  */
 public class Sometimes{
+    private static final String INVALID_ODDS_FMT = "Odds must be float between 0.0 and 1.0. %f invalid";
     private float odds;
 
     public Sometimes( float odds ){
+        if(odds < 0.0f || odds > 1.0f)
+            throw new ConfigurationException(String.format(INVALID_ODDS_FMT, odds));
         this.odds = odds;
     }
 

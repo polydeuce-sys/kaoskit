@@ -56,6 +56,7 @@ public class InterrupterTest {
 
         Interrupter i = new Interrupter(states, false);
         i.setMonitor(testMonitor);
+        i.start();
         Thread waitThread = new Thread(){
             @Override
             public void run(){
@@ -91,6 +92,7 @@ public class InterrupterTest {
                 e.printStackTrace();
             }
         }
+        i.stop();
         assertTrue(flag.get());
     }
 }

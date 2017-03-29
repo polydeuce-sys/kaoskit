@@ -1,4 +1,4 @@
-package com.polydeucesys.kaos;
+package com.polydeucesys.kaos.core;
 /*
  * Copyright (c) 2017 Polydeuce-Sys Ltd
  *  
@@ -18,10 +18,8 @@ package com.polydeucesys.kaos;
 
 import com.polydeucesys.kaos.core.*;
 import com.polydeucesys.kaos.core.behaviours.ExceptionThrower;
-import com.polydeucesys.kaos.core.behaviours.RandomSleeper;
 import com.polydeucesys.kaos.core.behaviours.conditions.RegexBehaviour;
 
-import javax.xml.ws.WebServiceException;
 import java.nio.file.FileSystemNotFoundException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -29,37 +27,30 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by kevinmclellan on 07/02/2017.
+ * Created by kevinmclellan on 28/03/2017.
  */
+
 public class UnitTestConfigurationImpl implements Configuration {
 
     private final Map<String, Strategy> strategies = new HashMap<String, Strategy>();
-
     public UnitTestConfigurationImpl(){
         Monitor m = new StringListMonitor();
         StrategyBuilder b = new KaosStrategy.KaosStrategyBuilder();
-        b.setName("test1");
+        b.setName("s1");
         b.setMonitor(m);
-        RandomSleeper s1 = new RandomSleeper(50L);
-        s1.setMonitor(m);
         List<Exception> le1 = new LinkedList<>();
-        le1.add(new WebServiceException());
         le1.add(new FileSystemNotFoundException());
         ExceptionThrower e1 = new ExceptionThrower(le1);
         e1.setMonitor(m);
-        SometimesBehaviour se1 = new SometimesBehaviour(1.0f, e1);
-        se1.setMonitor(m);
-        b.addBeforeBehaviour(s1);
-        b.addAfterBehaviour(se1);
-        strategies.put("test1", b.build());
-        StrategyBuilder b2 = new KaosStrategy.KaosStrategyBuilder();
-        b2.setName("test2");
-        b2.setMonitor(m);
-        RegexBehaviour re = new RegexBehaviour("^DoThrow");
-        IfBehaviour<String> ifs = new IfBehaviour<>(re, e1, new DoNothing.Behaviour<>());
-        ifs.setMonitor(m);
-        b2.addAfterBehaviour(ifs);
-        strategies.put("test2", b2.build());
+        b.addBeforeBehaviour(e1);
+        strategies.put("s1", b.build());
+        RegexBehaviour r1 = new RegexBehaviour("run");
+        IfBehaviour<String> ifs = new IfBehaviour<>(r1, e1, new DoNothing.Behaviour<>());
+        b = new KaosStrategy.KaosStrategyBuilder();
+        b.setName("s2");
+        b.setMonitor(m);
+        b.addAfterBehaviour(ifs);
+        strategies.put("s2",b.build());
     }
 
     @Override
@@ -68,7 +59,7 @@ public class UnitTestConfigurationImpl implements Configuration {
     }
 
     @Override
-    public Strategy strategyForName(String s) {
-        return strategies.get(s);
+    public Strategy strategyForName(String name) {
+        return strategies.get(name);
     }
 }

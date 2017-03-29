@@ -22,6 +22,7 @@ import com.polydeucesys.kaos.core.Modifier;
 import java.util.Random;
 
 /**
+ * A modifier which changes a value to a null.
  * Created by kevinmclellan on 29/09/2016.
  */
 public class NullRewriter<T> extends BaseModifier<T> {
