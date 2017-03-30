@@ -1,5 +1,5 @@
 # KaosKit
-The KaosKit is a destructive testing framework. It is intended to provide a simple means of forcing systems to run
+The KaosKit is a [Destructive Testing](https://en.wikipedia.org/wiki/Destructive_testing) framework. It is intended to provide a simple means of forcing systems to run
 under difficult conditions, to highlight issues such as race conditions or improper exception handling which
 may occour only rarely under normal testing and UAT conditions, but which can cause serious issues when running
 in production.

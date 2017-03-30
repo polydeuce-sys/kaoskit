@@ -23,7 +23,8 @@ import com.polydeucesys.kaos.core.KaosBase;
 import java.util.regex.Pattern;
 
 /**
- * A Regex based condition behaviour for use in the IfCondition
+ * A Regex based condition behaviour for use in the IfCondition.
+ * Returns {@code true} when the input matches the supplied regex.
  * Created by kevinmclellan on 25/01/2017.
  */
 public class RegexBehaviour extends BaseCondition<String> {

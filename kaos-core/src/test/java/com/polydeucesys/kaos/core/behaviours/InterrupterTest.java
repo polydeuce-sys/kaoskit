@@ -44,8 +44,6 @@ public class InterrupterTest {
         }
     };
 
-    @Ignore("This can be run from some IDEs, but actually seems to kill command line Gradle, " +
-            "because there may be code not handling InterruptedException there")
     @Test
     public void interruptWaitingTest(){
         final AtomicBoolean flag = new AtomicBoolean(false);
@@ -54,7 +52,7 @@ public class InterrupterTest {
         Set<Thread.State> states = new TreeSet<>();
         states.add(Thread.State.WAITING);
 
-        Interrupter i = new Interrupter(states, false);
+        Interrupter i = new Interrupter(states,"^WaitThread$", false);
         i.setMonitor(testMonitor);
         i.start();
         Thread waitThread = new Thread(){

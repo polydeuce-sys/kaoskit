@@ -20,6 +20,9 @@ import com.polydeucesys.kaos.core.BaseBehaviour;
 
 /**
  * Base class for conditionals used in the IfBehaviour.
+ * Essentially a type of {@link com.polydeucesys.kaos.core.Behaviour} which simply tests
+ * a condition against an input rather than perforing an action.
+ *
  * Created by kevinmclellan on 25/01/2017.
  */
 public abstract class BaseCondition<T> extends BaseBehaviour<T> {

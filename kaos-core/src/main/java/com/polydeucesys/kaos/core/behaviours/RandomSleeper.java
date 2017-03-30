@@ -24,7 +24,7 @@ import java.util.Random;
 
 /**
  * A BaseBehaviour which calls {@link Thread#sleep(long)} for a random time span in the configured range
- * (defaulting to 1-100ms)
+ * (defaulting to 1-100ms).
  * Created by kevinmclellan on 14/09/2016.
  */
 public class RandomSleeper extends BaseBehaviour {

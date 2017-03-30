@@ -41,7 +41,7 @@ public class DefaultConfigurationImplTest {
         System.setProperty(AFTER_BEHAVIOURS_KEY, "throw, interrupt");
         System.setProperty(SLEEP_PARAMS_KEY, "odds=0.25;max=50");
         System.setProperty(THROW_PARAMS_KEY, "matches=QueryDB\\s+;odds=0.62;throws=java.sql.SQLException,java.rmi.server.ServerNotActiveException");
-        System.setProperty(INTERRUPT_PARAMS_KEY, "states=WAITING,TIMED_WAITING;first=false");
+        System.setProperty(INTERRUPT_PARAMS_KEY, "states=WAITING,TIMED_WAITING;threadMatches=\\.+Receiver;first=false");
         try {
             Configuration defConfig = ConfigurationFactory.getInstance().getConfiguration();
             assertTrue("Does not return default config class", defConfig instanceof DefaultConfigurationImpl);
@@ -70,6 +70,7 @@ public class DefaultConfigurationImplTest {
             assertTrue(throwables.get(0) instanceof java.sql.SQLException);
             assertTrue(throwables.get(1) instanceof java.rmi.server.ServerNotActiveException);
             Interrupter i = (Interrupter) afters.get(1);
+            assertEquals( "\\.+Receiver", ValueGetter.getThreadNamePattern(i));
             assertTrue(!ValueGetter.getFirstMatchOnly(i));
             assertTrue(ValueGetter.getSearchStates(i).contains(Thread.State.WAITING));
             assertTrue(ValueGetter.getSearchStates(i).contains(Thread.State.TIMED_WAITING));

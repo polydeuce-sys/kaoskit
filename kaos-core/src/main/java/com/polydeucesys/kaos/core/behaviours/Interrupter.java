@@ -20,21 +20,28 @@ import com.polydeucesys.kaos.core.BaseBehaviour;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Searches the populations of Threads and calls interrupt on the threads
  * as determined by the configuration. Can interupt only the first matching, or
- * all matching, can can match by Thread state. Will use {@link ThreadGroup}
- * {@code enumerate(Thread[] list) } to search the available threads.
+ * all matching, can match by Thread state and Thread name. An empty set of {@code searchSttes} matches
+ * any {@code ThreadState}, similarly, and empty {@code threadNamePattern} will match any {@code Thread} name.
+ * Will use {@link ThreadGroup} {@code enumerate(Thread[] list) } to search the available threads.
  *
  * Created by kevinmclellan on 26/10/2016.
  */
 public class Interrupter extends BaseBehaviour {
     private final Set<Thread.State> searchStates;
+    private final Pattern threadNamePattern;
     private final boolean firstMatchOnly;
 
-    public Interrupter(Set<Thread.State> searchStates, boolean firstMatchOnly){
+    public Interrupter(Set<Thread.State> searchStates,
+                       String threadNamePattern,
+                       boolean firstMatchOnly){
         this.searchStates = Collections.unmodifiableSet(searchStates);
+        this.threadNamePattern = threadNamePattern.isEmpty()?null:Pattern.compile(threadNamePattern);
         this.firstMatchOnly = firstMatchOnly;
     }
 
@@ -42,8 +49,21 @@ public class Interrupter extends BaseBehaviour {
         return searchStates;
     }
 
+    String threadNamePattern(){
+        return threadNamePattern.pattern();
+    }
+
     boolean isFirstMatchOnly(){
         return firstMatchOnly;
+    }
+
+    private boolean threadNameMatches( Thread t ){
+        boolean match = true;
+        if(threadNamePattern != null){
+            Matcher m = threadNamePattern.matcher(t.getName());
+            match = m.find();
+        }
+        return match;
     }
 
     @Override
@@ -53,7 +73,8 @@ public class Interrupter extends BaseBehaviour {
         tg.enumerate(available);
         boolean didInterrupt = false;
         for(Thread t : available){
-            if( searchStates.isEmpty() || searchStates.contains(t.getState())){
+            if( searchStates.isEmpty() || searchStates.contains(t.getState()) ||
+                    threadNameMatches(t)){
                 t.interrupt();
                 if(firstMatchOnly) return true;
                 didInterrupt = true;

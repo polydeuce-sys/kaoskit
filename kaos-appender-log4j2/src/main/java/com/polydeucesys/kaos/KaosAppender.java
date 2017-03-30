@@ -50,7 +50,9 @@ public class KaosAppender extends AbstractAppender {
         if (layout == null) {
             layout = PatternLayout.createDefaultLayout();
         }
-        return new KaosAppender(name, filter, layout, ignoreExceptions);
+        KaosAppender appender = new KaosAppender(name, filter, layout, ignoreExceptions);
+        appender.setStrategyName(strategyName);
+        return appender;
     }
 
     private String strategyName;

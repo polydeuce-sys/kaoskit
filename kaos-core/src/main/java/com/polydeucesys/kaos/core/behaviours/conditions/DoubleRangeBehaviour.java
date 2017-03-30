@@ -21,7 +21,7 @@ import com.polydeucesys.kaos.core.KaosBase;
 
 /**
  * Conditional for {@link com.polydeucesys.kaos.core.IfBehaviour} or {@link com.polydeucesys.kaos.core.IfModifier}
- * Evaluates to true when the Double in question lies withing the specified range
+ * Evaluates to true when the Double in question lies withing the specified range.
  * Created by kevinmclellan on 25/01/2017.
  */
 public class DoubleRangeBehaviour extends BaseCondition<Double>{

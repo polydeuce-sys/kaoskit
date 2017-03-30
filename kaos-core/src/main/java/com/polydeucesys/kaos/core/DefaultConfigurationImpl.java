@@ -52,9 +52,9 @@ class DefaultConfigurationImpl implements Configuration {
     private static final String MATCHES = "matches";
     private static final String MAX = "max";
     private static final String CAN_THROW = "throws";
+    private static final String THREAD_MATCHES = "threadmatches";
     private static final String STATES = "states";
     private static final String ONLY_FIRST = "first";
-
 
 
     // err messages
@@ -160,8 +160,12 @@ class DefaultConfigurationImpl implements Configuration {
                     throw new ConfigurationException("Invalid state " + state + " for interrupter", c);
                 }
             }
+            String threadNamePattern = "";
+            if(interruptParamMap.containsKey(THREAD_MATCHES)){
+                threadNamePattern = interruptParamMap.get(THREAD_MATCHES);
+            }
             boolean firstOnly = !interruptParamMap.containsKey(ONLY_FIRST) || Boolean.parseBoolean(interruptParamMap.get(ONLY_FIRST));
-            interruptBehaviour = new Interrupter(searchStates, firstOnly);
+            interruptBehaviour = new Interrupter(searchStates, threadNamePattern, firstOnly);
             if(interruptParamMap.containsKey(MATCHES)){
                 interruptBehaviour = new IfBehaviour(new RegexBehaviour(interruptParamMap.get(MATCHES)),
                         interruptBehaviour,

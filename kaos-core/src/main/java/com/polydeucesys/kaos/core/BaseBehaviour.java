@@ -17,11 +17,12 @@ package com.polydeucesys.kaos.core;
  *       limitations under the License.
  */
 /**
- * A BaseBehaviour is an implementation wich has an effect on the running of the program it is in.
- * For example, a {@link com.polydeucesys.kaos.core.behaviours.RandomSleeper} behaviour running
- * in a log appender can be used to cause jitter in the timings of 3rd party libraries by
- * which having logging. The behaviour may also be used to throw errors, or change the behaviour of
- * network communications
+ * A BaseBehaviour is an abstract superclass implementing {@link Behaviour}. A behaviour is an action
+ * which has an effect on the running of the program it is in. For example, a
+ * {@link com.polydeucesys.kaos.core.behaviours.RandomSleeper} behaviour running
+ * in a log appender can be used to cause jitter in the timings of calls to 3rd party libraries
+ * which having logging. A behaviour may also be used to throw errors, interrupt sleeping threads or
+ * perform any other action which is not directly altering a parameter in a call.
  * Created by kevinmclellan on 13/09/2016.
  */
 public abstract class BaseBehaviour<T> extends KaosBase implements Behaviour<T> {

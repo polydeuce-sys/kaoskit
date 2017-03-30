@@ -48,7 +48,7 @@ public class KaosAppenderTest {
 
     @Test
     public void testAppenderExecutesBehaviours(){
-        Logger testLogger = LogManager.getLogger("UnitTest");
+        Logger testLogger = LogManager.getLogger("UnitTest1");
         boolean didThrow = false;
 
         try {

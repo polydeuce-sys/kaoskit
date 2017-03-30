@@ -26,7 +26,7 @@ import java.util.Random;
 /**
  * Class which throws an exception from the given list of exceptions. Note that an exception
  * thrower terminates the Strategy or conditional BaseBehaviour which contains it
- * when it throws.
+ * when it throws. The thrown exception is choen randomly from the list of provided Exceptions.
  * Created by kevinmclellan on 29/09/2016.
  */
 public class ExceptionThrower extends BaseBehaviour {

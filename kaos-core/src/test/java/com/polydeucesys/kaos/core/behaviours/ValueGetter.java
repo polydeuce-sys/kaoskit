@@ -41,6 +41,8 @@ public class ValueGetter {
         return i.searchStates();
     }
 
+    public static String getThreadNamePattern( Interrupter i) { return i.threadNamePattern(); }
+
     public static boolean getFirstMatchOnly( Interrupter i){
         return i.isFirstMatchOnly();
     }
