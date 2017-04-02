@@ -20,6 +20,7 @@ import com.polydeucesys.kaos.core.StringListMonitor;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,9 +46,13 @@ public class KaosAppenderTest {
         System.clearProperty(CONFIGURATION_CLASS_KEY);
     }
 
+    @AfterClass
+    public static void shutdownLoggers(){
+        LogManager.shutdown();
+    }
+
     @Test
     public void testAppenderExecutesBehaviours(){
-
         Logger testLogger = LogManager.getLogger("UnitTest1");
         boolean didThrow = false;
 

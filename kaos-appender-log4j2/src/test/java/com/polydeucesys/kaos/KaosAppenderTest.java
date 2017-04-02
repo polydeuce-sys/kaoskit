@@ -71,6 +71,7 @@ public class KaosAppenderTest {
         }
         assertTrue(seenExecuted);
         assertTrue(didThrow);
+        LogManager.shutdown();
     }
 
     @Test
@@ -102,5 +103,7 @@ public class KaosAppenderTest {
         }
 
         assertTrue(didThrow);
+        LogManager.shutdown();
+
     }
 }

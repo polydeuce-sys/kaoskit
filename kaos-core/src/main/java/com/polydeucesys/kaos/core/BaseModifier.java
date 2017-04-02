@@ -17,8 +17,8 @@ package com.polydeucesys.kaos.core;
  */
 
 /**
- * Base class for Modifier implementations Will deal with validation and
- * with monitoring messages.
+ * Base class for Modifier implementations. Modifiers change the values passed to them
+ * and are used (for example) with AOP techniques to alter the inputs or outputs of a method.
  * Created by kevinmclellan on 03/10/2016.
  */
 public abstract class BaseModifier<T> extends KaosBase implements Modifier<T> {

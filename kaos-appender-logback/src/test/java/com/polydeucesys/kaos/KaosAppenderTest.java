@@ -19,6 +19,7 @@ package com.polydeucesys.kaos;
 import ch.qos.logback.classic.LoggerContext;
 import com.polydeucesys.kaos.core.StringListMonitor;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -44,6 +45,11 @@ public class KaosAppenderTest {
     @After
     public void cleanProps(){
         System.clearProperty(CONFIGURATION_CLASS_KEY);
+    }
+
+    @AfterClass
+    public static void shutdownLogger(){
+        ((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
     }
 
     @Test
@@ -81,7 +87,6 @@ public class KaosAppenderTest {
 
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         context.start();
-
         Logger testLogger = LoggerFactory.getLogger("UnitTest2");
         boolean didThrow = false;
 

@@ -29,6 +29,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by kevinmclellan on 31/10/2016.
@@ -41,7 +42,7 @@ public class KaosAppender extends AbstractAppender {
                                               @PluginAttribute("ignoreExceptions") boolean ignoreExceptions,
                                               @PluginElement("Layout") Layout layout,
                                               @PluginElement("Filters") Filter filter,
-                                              @PluginAttribute("strategyName") String strategyName){
+                                              @PluginAttribute("strategyName") String strategyName) {
         if (name == null) {
             LOGGER.error("No name provided for StubAppender");
             return null;
@@ -58,7 +59,7 @@ public class KaosAppender extends AbstractAppender {
     private String strategyName;
     private GenericKaosRunner kaosRunner = new GenericKaosRunner();
 
-    private class KaosErrorHandler implements ErrorHandler{
+    private class KaosErrorHandler implements ErrorHandler {
 
         @Override
         public void error(String msg) {
@@ -67,7 +68,7 @@ public class KaosAppender extends AbstractAppender {
 
         @Override
         public void error(String msg, Throwable t) {
-            kaosRunner.errorHandler().error(msg,t);
+            kaosRunner.errorHandler().error(msg, t);
         }
 
         @Override
@@ -78,10 +79,10 @@ public class KaosAppender extends AbstractAppender {
 
     protected KaosAppender(String name, Filter filter, Layout<? extends Serializable> layout, boolean ignoreExceptions) {
         super(name, filter, layout, ignoreExceptions);
-        setHandler( new KaosErrorHandler());
+        setHandler(new KaosErrorHandler());
     }
 
-    public void setStrategyName( String strategyName ){
+    public void setStrategyName(String strategyName) {
         kaosRunner.setStrategyName(strategyName);
     }
 
@@ -90,19 +91,30 @@ public class KaosAppender extends AbstractAppender {
         try {
             kaosRunner.causeKaos(log.getMessage().getFormattedMessage());
         } catch (Exception e) {
-            error(e.getMessage(),e);
+            error(e.getMessage(), e);
         }
     }
 
     @Override
-    public void start(){
+    public void start() {
         super.start();
         kaosRunner.start();
     }
 
     @Override
-    public void stop(){
+    public void stop() {
         super.stop();
         kaosRunner.stop();
+    }
+
+    @Override
+    protected boolean stop(final long timeout, final TimeUnit timeUnit, final boolean changeLifeCycleState) {
+        boolean result = false;
+        try {
+            kaosRunner.stop();
+        } finally {
+            result = super.stop(timeout, timeUnit, changeLifeCycleState);
+        }
+        return result;
     }
 }
